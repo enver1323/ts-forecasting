@@ -4,7 +4,7 @@ from generics import BaseConfig
 
 
 @dataclass
-class PointIDARConfig(BaseConfig):
+class LinAdaptConfig(BaseConfig):
 
     @dataclass
     class ModelConfig:
@@ -12,9 +12,8 @@ class PointIDARConfig(BaseConfig):
         seq_len: int = 96
         label_len: int = 48
         pred_len: int = 96
-        window_len: int = 96
         kernel_size: int = 25
-        n_choices: int = 4
+        individual: int = 0
 
     @dataclass
     class DataConfig:

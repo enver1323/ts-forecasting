@@ -19,7 +19,8 @@ class PointIDTrainer(BaseTrainer):
         self.config: PointIDConfig
         super(PointIDTrainer, self).__init__(config, device)
 
-        self.model = self.model_type(config=self.config.model).to(self.device)
+        self.model: PointID = self.model_type(
+            config=self.config.model).to(self.device)
         self.PLOT_PATH = f'plots/{self.experiment_key}/'
         self.RESULTS_PATH = 'results.txt'
         self.__set_data(self.config.data)
@@ -30,16 +31,19 @@ class PointIDTrainer(BaseTrainer):
     def model_type(self) -> Type[PointID]:
         return PointID
 
-    @property
-    def experiment_key(self):
+    def get_experiment_key(self, config: PointIDConfig):
         model_name = str(self.model)
         model_name = model_name[:model_name.find('(')]
-        seq_len = self.config.model.seq_len
-        pred_len = self.config.model.pred_len
-        n_points = self.config.model.n_points
-        data = self.config.data.dataset.path.split('/')[-1].split('.')[0]
+        seq_len = config.model.seq_len
+        pred_len = config.model.pred_len
+        n_points = config.model.n_points
+        data = config.data.dataset.path.split('/')[-1].split('.')[0]
 
-        return f"{model_name}_{data}_({seq_len}->{pred_len})_pts_{n_points}_SeasonLinear"
+        return f"{model_name}_{data}_({seq_len}->{pred_len})_pts_{n_points}"
+
+    @property
+    def experiment_key(self):
+        return self.get_experiment_key(self.config)
 
     @property
     def criterion(self) -> Callable:
@@ -154,20 +158,25 @@ class PointIDTrainer(BaseTrainer):
             y = y.detach().cpu()
             y = y[:, -self.model.pred_len:, :]
 
-            y = torch.concat([x[:, -1:, :], y], dim=-2)
-            pred = torch.concat([x[:, -1:, :], pred], dim=-2)
+            # y = torch.concat([x[:, -1:, :], y], dim=-2)
+            # pred = torch.concat([x[:, -1:, :], pred], dim=-2)
+            y = torch.concat([x, y], dim=-2)
+            pred = torch.concat([x, pred], dim=-2)
 
             seq_len = self.config.model.seq_len
             pred_len = self.config.model.pred_len
 
-            x_ticks = torch.arange(0, seq_len)
-            y_ticks = torch.arange(seq_len - 1, seq_len + pred_len)
+            # x_ticks = torch.arange(0, seq_len)
+            # y_ticks = torch.arange(seq_len - 1, seq_len + pred_len)
 
-            plt.plot(x_ticks, x[0, :, -1])
-            plt.plot(y_ticks, y[0, :, -1])
-            plt.plot(y_ticks, pred[0, :, -1])
+            # plt.plot(x_ticks, x[0, :, -1])
+            # plt.plot(y_ticks, y[0, :, -1])
+            # plt.plot(y_ticks, pred[0, :, -1])
+            plt.plot(y[0, :, -1], label='GroundTruth', linewidth=2)
+            plt.plot(pred[0, :, -1], label='Prediction', linewidth=2)
 
             plt.tight_layout()
+            plt.legend()
             plt.savefig(filepath)
             plt.close()
 

@@ -1,50 +1,46 @@
 from typing import Callable, Type, Optional
-from copy import deepcopy
 import os
 
 import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from domain.point_id import PointIDTrainer
-from domain.point_id_ar.modules.model import PointIDAR, compute_loss
-from domain.point_id_ar.config import PointIDARConfig
+from domain.point_id_ar import PointIDARTrainer
+from domain.lin_adapt.modules.model import LinAdapt, compute_loss
+from domain.lin_adapt.config import LinAdaptConfig
 from generics import BaseConfig
 
 
-class PointIDARTrainer(PointIDTrainer):
+class LinAdaptTrainer(PointIDARTrainer):
     def __init__(self, config: BaseConfig, device: torch.device):
-        self.config: PointIDARConfig
-        self.model: PointIDAR
-        super(PointIDARTrainer, self).__init__(config, device)
+        self.config: LinAdaptConfig
+        super(LinAdaptTrainer, self).__init__(config, device)
 
     @property
-    def model_type(self) -> Type[PointIDAR]:
-        return PointIDAR
+    def model_type(self) -> Type[LinAdapt]:
+        return LinAdapt
 
-    def get_experiment_key(self, config: PointIDARConfig):
+    def get_experiment_key(self, config: LinAdaptConfig):
         model_name = str(self.model)
         model_name = model_name[:model_name.find('(')]
         seq_len = config.model.seq_len
         pred_len = config.model.pred_len
-        n_choices = config.model.n_choices
         data = config.data.dataset.path.split('/')[-1].split('.')[0]
 
-        return f"{model_name}_{data}_({seq_len}->{pred_len})_choices_{n_choices}_SepLossResScaled_GlobalRevIN_PointMLP"
+        return f"{model_name}_{data}_({seq_len}->{pred_len})_SepLoss"
     
     @property
     def criterion(self) -> Callable:
         return compute_loss
-
+    
     def train(self):
-        # cur_config = deepcopy(self.config)
-        # cur_config.model.pred_len = 96
-        # self.early_stopping.load_checkpoint(self.model, self.get_experiment_key(cur_config))
-
         mse_optimizer = torch.optim.AdamW(
             self.model.parameters(), self.config.lr.init
         )
         dtw_optimizer = torch.optim.AdamW(
+            self.model.parameters(), self.config.lr.init
+        )
+        norm_optimizer = torch.optim.AdamW(
             self.model.parameters(), self.config.lr.init
         )
         # scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, [5], gamma=self.config.lr.gamma)
@@ -57,14 +53,18 @@ class PointIDARTrainer(PointIDTrainer):
                 batch = [datum.float().to(self.device) for datum in batch]
 
                 mse_optimizer.zero_grad()
-                dtw_optimizer.zero_grad()
+                # dtw_optimizer.zero_grad()
+                # norm_optimizer.zero_grad()
 
-                (mse_loss, dtw_loss), aux_data = self.criterion(self.model, *batch)
+                (mse_loss, dtw_loss, norm_loss), aux_data = self.criterion(self.model, *batch)
                 mse_loss.backward()
                 mse_optimizer.step()
 
-                dtw_loss.backward()
-                dtw_optimizer.step()
+                # dtw_loss.backward()
+                # dtw_optimizer.step()
+
+                # norm_loss.backward()
+                # norm_optimizer.step()
 
                 total_loss += mse_loss.item()
 
@@ -99,7 +99,7 @@ class PointIDARTrainer(PointIDTrainer):
 
             for step, batch in enumerate(data):
                 batch = [datum.float().to(self.device) for datum in batch]
-                (mse_loss, dtw_loss), aux_data = self.criterion(self.model, *batch)
+                (mse_loss, *_), aux_data = self.criterion(self.model, *batch)
                 total_loss += mse_loss.item()
                 if stat_split is not None:
                     self.log.add_stat(stat_split, aux_data)

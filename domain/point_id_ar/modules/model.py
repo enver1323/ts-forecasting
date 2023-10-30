@@ -19,7 +19,7 @@ class PointIDAR(nn.Module):
         self.seq_len = config.seq_len
         self.pred_len = config.pred_len
 
-        point_estimator_args = (self.seq_len, self.pred_len, config.n_choices)
+        point_estimator_args = (self.seq_len, self.pred_len, config.window_len, config.n_choices)
         self.trend_pts = get_channelwise_modules(
             self.n_channels, TrendPointEstimator, point_estimator_args)
         self.season_pts = get_channelwise_modules(
@@ -27,8 +27,7 @@ class PointIDAR(nn.Module):
         # self.season_lins = get_channelwise_modules(
         #     self.n_channels, nn.Linear, (self.seq_len, self.pred_len))
 
-        self.decomposition = SeriesDecomposition(
-            MovingAverage(config.kernel_size))
+        self.decomposition = SeriesDecomposition(MovingAverage(config.kernel_size))
         self.rev_in = RevIN(self.n_channels)
         # self.transformer_enc = nn.TransformerEncoderLayer(d_model=self.pred_len, nhead=4, dim_feedforward=self.pred_len * 4, activation=nn.GELU(), batch_first=True)
         # self.attn = nn.MultiheadAttention(self.pred_len, 4, dropout=0.5, batch_first=True)
@@ -66,7 +65,7 @@ class PointIDAR(nn.Module):
         return result
 
 
-def compute_loss(model: PointIDAR, *args: Tensor) -> Tuple[Tensor, Dict[str, Any]]:
+def compute_loss(model: PointIDAR, *args: Tensor) -> Tuple[Tuple[Tensor, Tensor], Dict[str, Any]]:
     x, y, *_ = args
 
     y = y[:, -model.pred_len:, :]
@@ -77,11 +76,13 @@ def compute_loss(model: PointIDAR, *args: Tensor) -> Tuple[Tensor, Dict[str, Any
     # soft_dtw_loss = soft_dtw_loss.mean()
     # path_dtw_loss = path_dtw_loss.mean()
 
+    mse_scale = 100 # 200
+    mse_loss = mse(pred_y, y)
+
+    pred_y = model(x)
+
     soft_dtw_loss = SoftDTW(normalize=False)(pred_y, y)
     soft_dtw_loss = soft_dtw_loss.mean()
-
-    mse_loss = mse(pred_y, y)
-    mse_scale = 100 # 200
 
     loss = soft_dtw_loss + mse_scale * mse_loss
 
@@ -93,4 +94,4 @@ def compute_loss(model: PointIDAR, *args: Tensor) -> Tuple[Tensor, Dict[str, Any
         "MAE": mae(pred_y, y).item(),
     }
 
-    return loss, metrics
+    return (mse_loss, soft_dtw_loss), metrics

@@ -2,6 +2,8 @@ import torch
 from torch import nn, Tensor
 from abc import abstractmethod, ABC
 from typing import Callable
+import numpy as np
+import math
 
 
 class PointEstimator(nn.Module, ABC):
@@ -22,6 +24,14 @@ class PointEstimator(nn.Module, ABC):
         self.component_lin = nn.Linear(seq_len, self._n_slots * self.n_params)
         self.combine_lin = nn.Linear(self.pred_len, 1)
 
+        self.__init_weights_uniform(self.component_lin)
+
+    def __init_weights_uniform(self, module: nn.Linear):
+        n = module.in_features
+        y = 1.0/np.sqrt(n)
+        module.weight.data.uniform_(-y, y)
+        module.bias.data.fill_(0)
+
     def _generate_points(self, x: Tensor) -> Tensor:
         x = self.pts_lin(x)
         x = x.reshape(x.shape[0], self.n_pts, self.pred_len)
@@ -41,6 +51,23 @@ class PointEstimator(nn.Module, ABC):
         mask = mask.repeat(pts_data.shape[0], pts_data.shape[1], 1)
         mask = torch.where(condition(mask), 1, 0)
         return mask
+
+    def _get_pts_distances(self, pts: Tensor) -> Tensor:
+        B = pts.shape[0]
+        pts_template = torch.ones((B, 1)).to(pts.device)
+        pts_start_shifted = torch.concat([pts_template * 0, pts], dim=-1)
+        pts_end_shifted = torch.concat(
+            [pts, self.pred_len * pts_template], dim=-1)
+
+        return pts_end_shifted - pts_start_shifted
+    
+    def _get_pts_scale(self, pts: Tensor) -> Tensor:
+        pts_scale = self._get_pts_distances(pts).unsqueeze(-1) + 1
+        pts_scale = pts_scale / self._n_slots
+        pts_scale = pts_scale + 1e-4
+
+        return pts_scale
+
 
     def _combine_by_pts(self, pts_data: Tensor, pts: Tensor) -> Tensor:
         B = pts.shape[0]
@@ -81,15 +108,10 @@ class PointEstimator(nn.Module, ABC):
         pass
 
     def forward(self, x: Tensor) -> Tensor:
-        last_val = x[:, -1:]
-        x = x - last_val
-
         pts = self._generate_points(x)  # (B, n_pts,)
         # (B, _n_slots, _n_trend_params)
         params = self._generate_component_params(x)
         x = self._generate(params, pts)  # (B, pred_len,)
-
-        x = x + last_val
 
         return x
 
@@ -101,7 +123,7 @@ class TrendPointEstimator(PointEstimator):
         pred_len: int,
         n_pts: int
     ):
-        super(TrendPointEstimator, self).__init__(seq_len, pred_len, n_pts, 1)
+        super(TrendPointEstimator, self).__init__(seq_len, pred_len, n_pts, 2)
 
     def _combine_by_pts(self, pts_data: Tensor, pts: Tensor) -> Tensor:
         B = pts.shape[0]
@@ -149,8 +171,12 @@ class TrendPointEstimator(PointEstimator):
     def _generate(self, params: Tensor, pts: Tensor) -> Tensor:
         x = torch.arange(self.pred_len).reshape(
             (1, 1, self.pred_len)).float().to(params.device)
-        a = params[:, :, 0:1]  # (B, _n_slots, 1)
-        y = a @ x  # (B, _n_slots, pred_len)
+        
+        a, b = params[:, :, 0:1], params[:, :, 1:2]  # (B, _n_slots, 1)
+        a = a / self._get_pts_scale(pts)
+        b = b / self._get_pts_scale(pts) - 1
+
+        y = a @ x + b  # (B, _n_slots, pred_len)
 
         combined = self._combine_by_pts(y, pts)
         return combined
@@ -163,10 +189,10 @@ class SeasonPointEstimator(PointEstimator):
         pred_len: int,
         n_pts: int,
     ):
-        # super(SeasonPointEstimator, self).__init__(
-        #     seq_len, pred_len, n_pts, pred_len)
         super(SeasonPointEstimator, self).__init__(
-            seq_len, pred_len, n_pts, 3)
+            seq_len, pred_len, n_pts, pred_len)
+        # super(SeasonPointEstimator, self).__init__(
+        #     seq_len, pred_len, n_pts, 3)
 
     def _generate_lin(self, params: Tensor, pts: Tensor) -> Tensor:
         y = params.reshape(params.shape[0], self._n_slots, self.pred_len)
@@ -174,12 +200,18 @@ class SeasonPointEstimator(PointEstimator):
         combined = self._combine_by_pts(y, pts)
         return combined
 
-    def _generate(self, params: Tensor, pts: Tensor) -> Tensor:
+    def _generate_sin(self, params: Tensor, pts: Tensor) -> Tensor:
         x = torch.arange(self.pred_len)\
             .reshape((1, 1, self.pred_len)).float().to(params.device)
         a, b, c = params[:, :, 0:1], params[:, :,
                                             1:2], params[:, :, 2:3]  # (B, _n_slots, 1)
         y = a * torch.sin(b * x + c)  # (B, _n_slots, pred_len)
+
+        combined = self._combine_by_pts(y, pts)
+        return combined
+
+    def _generate(self, params: Tensor, pts: Tensor) -> Tensor:
+        y = params / self._get_pts_scale(pts)
 
         combined = self._combine_by_pts(y, pts)
         return combined

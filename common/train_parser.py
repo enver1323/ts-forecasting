@@ -3,6 +3,7 @@ from typing import Optional, Dict, Type
 from generics import BaseTrainer, BaseConfig
 from domain.point_id import PointIDConfig, PointIDTrainer
 from domain.point_id_ar import PointIDARConfig, PointIDARTrainer
+from domain.lin_adapt import LinAdaptConfig, LinAdaptTrainer
 from dataclasses import is_dataclass, fields, asdict
 from enum import Enum
 
@@ -10,6 +11,7 @@ from enum import Enum
 class ParserConfigs(Enum):
     point_id = ('point_id', PointIDConfig, PointIDTrainer)
     point_id_ar = ('point_id_ar', PointIDARConfig, PointIDARTrainer)
+    lin_adapt = ('lin_adapt', LinAdaptConfig, LinAdaptTrainer)
 
     def __init__(self, key: str, config: Type[BaseConfig], trainer: Type[BaseTrainer]):
         self.key = key

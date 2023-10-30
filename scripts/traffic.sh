@@ -23,7 +23,7 @@ for pred_len in ${pred_lens[@]};
 do
     python train.py \
         $config \
-        --wandb_log=1 \
+        --wandb_log=0 \
         --data.dataset.path=data/traffic.csv \
         --model.n_choices=4 \
         --model.n_channels=862 \
