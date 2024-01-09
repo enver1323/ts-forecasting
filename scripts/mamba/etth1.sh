@@ -7,9 +7,9 @@ for pred_len in ${pred_lens[@]};
 do
     python train_jax.py \
         $config \
-        --data.dataset.path=data/electricity.csv \
-        --data.loader=common \
-        --model.n_channels=321 \
+        --data.dataset.path=data/ETTh1.csv \
+        --data.loader=etth \
+        --model.n_channels=7 \
         --model.seq_len=336 \
         --model.label_len=0 \
         --model.pred_len=96 \

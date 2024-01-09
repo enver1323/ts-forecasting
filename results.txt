@@ -11458,3 +11458,21 @@ valid/pred_loss: 0.9890266060829163
 test/pred_loss: 0.9623311758041382
 
 
+Mamba_ETTh1_cp_(192->96|48)x1_pred_loss_ssm
+train/pred_loss: 0.7951383590698242
+valid/pred_loss: 0.9886276125907898
+test/pred_loss: 0.9526716470718384
+
+
+Mamba_ETTh1_(336->96|24)x1_pred_loss_ssm
+train/pred_loss: 0.33783870935440063
+valid/pred_loss: 0.8454802632331848
+test/pred_loss: 0.3923514783382416
+
+
+Mamba_ETTh1_cp_(192->96|48)x1_pred_loss_ssm
+train/pred_loss: 0.30248475074768066
+valid/pred_loss: 0.37865662574768066
+test/pred_loss: 0.4168546199798584
+
+
