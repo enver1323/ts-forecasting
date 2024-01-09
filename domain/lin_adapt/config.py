@@ -1,12 +1,11 @@
 from dataclasses import dataclass, field
-from domain.common.dataset import SequenceSize, DATASET_LOADER_KEY_MAP
+from domain._common.data.dataset import SequenceSize, DATASET_LOADER_KEY_MAP
 from generics import BaseConfig
 
 
 @dataclass
 class LinAdaptConfig(BaseConfig):
 
-    @dataclass
     class ModelConfig:
         n_channels: int = 7
         seq_len: int = 96
@@ -15,7 +14,6 @@ class LinAdaptConfig(BaseConfig):
         kernel_size: int = 25
         individual: int = 0
 
-    @dataclass
     class DataConfig:
         @dataclass
         class DatasetConfig:
@@ -26,7 +24,6 @@ class LinAdaptConfig(BaseConfig):
         loader: str = 'common'
         batch_size: int = 32
 
-    @dataclass
     class LearningRateConfig:
         init: float = 1e-4
         gamma: float = 0.3

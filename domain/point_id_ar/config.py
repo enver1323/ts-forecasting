@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from domain.common.dataset import SequenceSize, DATASET_LOADER_KEY_MAP
+from domain._common.data.dataset import SequenceSize, DATASET_LOADER_KEY_MAP
 from generics import BaseConfig
 
 

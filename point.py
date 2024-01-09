@@ -3,6 +3,7 @@ import jax.numpy as jnp
 import jax.random as jrandom
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
+from statsmodels.tsa.stattools import adfuller
 import plotly.graph_objects as go
 import math
 from functools import partial

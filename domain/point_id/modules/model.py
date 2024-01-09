@@ -1,10 +1,9 @@
 import torch
 from torch import nn, Tensor
-from typing import Tuple, Dict, Any, Sequence, Type
-from domain.common.dilate_loss.soft_dtw import SoftDTW
-from domain.common.dilate_loss.dilate import dilate_loss
-from domain.common.modules import SeriesDecomposition, MovingAverage, get_channelwise_modules, RevIN
-from domain.common.metrics import mse, mae, kl_divergence
+from typing import Sequence, Type
+from domain._common.utils import get_channelwise_modules
+from domain._common.modules.normalization import RevIN
+from domain._common.modules.decomposition import SeriesDecomposition, MovingAverage
 from domain.point_id.modules.layers import TrendPointEstimator, SeasonPointEstimator
 from domain.point_id.config import PointIDConfig
 
@@ -31,7 +30,7 @@ class PointID(nn.Module):
 
         self.decomposition = SeriesDecomposition(
             MovingAverage(config.kernel_size))
-        
+
         self.rev_in = RevIN(1)
 
     def _get_channelwise_modules(self, module: Type[nn.Module], args: Sequence) -> nn.ModuleList:
@@ -64,33 +63,3 @@ class PointID(nn.Module):
         result = self.rev_in(result, 'denorm')
 
         return result
-
-
-def compute_loss(model: PointID, *args: Tensor) -> Tuple[Tensor, Dict[str, Any]]:
-    x, y, *_ = args
-
-    y = y[:, -model.pred_len:, :]
-    pred_y = model(x)
-
-    # loss, soft_dtw_loss, path_dtw_loss = dilate_loss(pred_y, y, normalize=True)
-    # loss = loss.mean()
-    # soft_dtw_loss = soft_dtw_loss.mean()
-    # path_dtw_loss = path_dtw_loss.mean()
-
-    soft_dtw_loss = SoftDTW(normalize=False)(pred_y, y)
-    soft_dtw_loss = soft_dtw_loss.mean()
-
-    mse_loss = mse(pred_y, y)
-    mse_scale = 100 # 200
-
-    loss = soft_dtw_loss + mse_scale * mse_loss
-
-    metrics = {
-        "Loss": loss.item(),
-        "SoftDTW": soft_dtw_loss.item(),
-        # "PathDTW": path_dtw_loss.item(),
-        "MSE": mse_loss.item(),
-        "MAE": mae(pred_y, y).item(),
-    }
-
-    return loss, metrics

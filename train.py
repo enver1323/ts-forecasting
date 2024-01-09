@@ -2,22 +2,26 @@ from common import TrainParser
 import torch
 import numpy as np
 import os
+from argparse import Namespace
 from typing import Optional, Type, Tuple
 from generics import BaseConfig, BaseTrainer
 
 os.environ["XLA_PYTHON_CLIENT_MEM_FRACTION"]="0.7"
 
 
-def get_trainer_config() -> Tuple[Optional[BaseConfig], Optional[Type[BaseTrainer]]]:
+def get_trainer_config(*args, **kwargs) -> Tuple[Optional[BaseConfig], Optional[Type[BaseTrainer]]]:
     parser = TrainParser()
-    config = parser.parse_args_to_config()
-    trainer = parser.get_trainer()
+    config = parser.parse_args_to_config(*args, **kwargs)
+    trainer = parser.get_trainer(*args, **kwargs)
+    # args = ['point_predictor']
+    # config = parser.parse_args_to_config(args)
+    # trainer = parser.get_trainer(args)
     print("Loading app configuration ...")
 
     return config, trainer
 
-def app():
-    config, trainer_type = get_trainer_config()
+def app(*args, **kwargs):
+    config, trainer_type = get_trainer_config(*args, **kwargs)
     if config is None or trainer_type is None:
         return
 
@@ -26,11 +30,12 @@ def app():
     np.random.seed(seed_val)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+    torch.autograd.set_detect_anomaly(True)
+
     trainer = trainer_type(config, device)
-    trainer.log.start(project="time_series_forecasting",name=trainer.experiment_key)
     trainer.train()
     trainer.test()
-    trainer.log.finish()
+    return trainer
 
 
 if __name__ == '__main__':

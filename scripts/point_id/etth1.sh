@@ -7,7 +7,6 @@ for pred_len in ${pred_lens[@]};
 do
     python train.py \
         $config \
-        --wandb_log=0 \
         --data.dataset.path=data/ETTh1.csv \
         --model.n_channels=7 \
         --model.seq_len=336 \

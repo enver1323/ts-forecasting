@@ -1,9 +1,8 @@
 import torch
 from torch import nn, Tensor
-from typing import Tuple, Dict, Any
-from domain.common.dilate_loss.soft_dtw import SoftDTW
-from domain.common.modules import SeriesDecomposition, MovingAverage, get_channelwise_modules, RevIN
-from domain.common.metrics import mse, mae, kl_divergence
+from domain._common.modules.normalization import RevIN
+from domain._common.utils import get_channelwise_modules
+from domain._common.modules.decomposition import SeriesDecomposition, MovingAverage
 from domain.point_id_ar.modules.layers import TrendPointEstimator, SeasonPointEstimator
 from domain.point_id_ar.config import PointIDARConfig
 
@@ -63,35 +62,3 @@ class PointIDAR(nn.Module):
         result = self.rev_in(result, 'denorm')
 
         return result
-
-
-def compute_loss(model: PointIDAR, *args: Tensor) -> Tuple[Tuple[Tensor, Tensor], Dict[str, Any]]:
-    x, y, *_ = args
-
-    y = y[:, -model.pred_len:, :]
-    pred_y = model(x)
-
-    # loss, soft_dtw_loss, path_dtw_loss = dilate_loss(pred_y, y, normalize=True)
-    # loss = loss.mean()
-    # soft_dtw_loss = soft_dtw_loss.mean()
-    # path_dtw_loss = path_dtw_loss.mean()
-
-    mse_scale = 100 # 200
-    mse_loss = mse(pred_y, y)
-
-    pred_y = model(x)
-
-    soft_dtw_loss = SoftDTW(normalize=False)(pred_y, y)
-    soft_dtw_loss = soft_dtw_loss.mean()
-
-    loss = soft_dtw_loss + mse_scale * mse_loss
-
-    metrics = {
-        "Loss": loss.item(),
-        "SoftDTW": soft_dtw_loss.item(),
-        # "PathDTW": path_dtw_loss.item(),
-        "MSE": mse_loss.item(),
-        "MAE": mae(pred_y, y).item(),
-    }
-
-    return (mse_loss, soft_dtw_loss), metrics

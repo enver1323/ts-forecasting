@@ -2,7 +2,7 @@ import torch
 from torch import nn, Tensor
 import math
 from abc import abstractmethod, ABC
-from domain.common.modules import RevIN
+from domain._common.modules.normalization import RevIN
 from typing import Callable, List, Union, Sequence
 
 
@@ -91,7 +91,6 @@ class PointEstimator(nn.Module, ABC):
         outputs = [x[idx] for idx in range(B)]
         total_len = self.seq_len + self.pred_len
         residual = self.res_lin(x)
-        step = 0
 
         while any([len(output) < total_len for output in outputs]):
             x = torch.stack([output[-self.seq_len:]
@@ -113,8 +112,6 @@ class PointEstimator(nn.Module, ABC):
                 cur_pred = pts_preds[pred_idx]
                 outputs[idx] = torch.cat((outputs[idx], cur_pred))
                 pred_idx += 1
-
-            step += 1
 
         outputs = [output[self.seq_len:total_len] for output in outputs]
         output_tensor = torch.stack(outputs)

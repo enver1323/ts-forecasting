@@ -1,31 +1,27 @@
 import os
-from typing import Optional, Sequence, Callable, Type
+from typing import Optional, Sequence, Callable, Type, Tuple, Dict, Any
 from dataclasses import asdict
 
 import torch
+from torch import Tensor
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 import matplotlib.pyplot as plt
+import matplotlib
 
-from domain.point_id.modules.model import PointID, compute_loss
+from domain.point_id.modules.model import PointID
 from domain.point_id.config import PointIDConfig
-from domain.common.utils import EarlyStopping
-from domain.common.dataset import DATASET_LOADER_KEY_MAP, CommonTSDataset
-from generics import BaseTrainer, DataSplit, BaseConfig
+from domain._common.trainers._base_torch_trainer import BaseTorchTrainer
+from domain._common.losses.softdtw_loss.soft_dtw_torch import SoftDTW
+from domain._common.losses.metrics_torch import mse, mae
+from generics import BaseConfig
 
 
-class PointIDTrainer(BaseTrainer):
+class PointIDTrainer(BaseTorchTrainer):
     def __init__(self, config: BaseConfig, device: torch.device):
         self.config: PointIDConfig
+
         super(PointIDTrainer, self).__init__(config, device)
-
-        self.model: PointID = self.model_type(
-            config=self.config.model).to(self.device)
-        self.PLOT_PATH = f'plots/{self.experiment_key}/'
-        self.RESULTS_PATH = 'results.txt'
-        self.__set_data(self.config.data)
-
-        self.early_stopping = EarlyStopping(self.config.patience)
 
     @property
     def model_type(self) -> Type[PointID]:
@@ -41,108 +37,52 @@ class PointIDTrainer(BaseTrainer):
 
         return f"{model_name}_{data}_({seq_len}->{pred_len})_pts_{n_points}"
 
-    @property
-    def experiment_key(self):
-        return self.get_experiment_key(self.config)
-
-    @property
-    def criterion(self) -> Callable:
-        return compute_loss
-
-    def __get_data_loader(self, config: PointIDConfig.DataConfig.DatasetConfig, data_loader: Type[CommonTSDataset], data_split: DataSplit, **kwargs) -> DataLoader:
-        dataset = data_loader(**{**(asdict(config)), "data_split": data_split})
-        return DataLoader(dataset, **kwargs)
-
-    def __set_data(self, config: PointIDConfig.DataConfig):
-        dataset_config = config.dataset
-        data_loader = DATASET_LOADER_KEY_MAP[config.loader]
-        self.train_data = self.__get_data_loader(
-            dataset_config, data_loader, DataSplit.train, batch_size=config.batch_size, shuffle=True
-        )
-        self.valid_data = self.__get_data_loader(
-            dataset_config, data_loader, DataSplit.valid, batch_size=config.batch_size, shuffle=True
-        )
-        self.test_data = self.__get_data_loader(
-            dataset_config, data_loader, DataSplit.test, batch_size=config.batch_size
+    def _get_optimizers(self) -> Sequence[torch.optim.Optimizer]:
+        return (
+            torch.optim.AdamW(self.model.parameters(), self.config.lr.init),
         )
 
-    def train(self):
-        optimizer = torch.optim.AdamW(
-            self.model.parameters(), self.config.lr.init
-        )
-        # scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, [5], gamma=self.config.lr.gamma)
+    def __compute_loss(self, x: Tensor, y: Tensor) -> Tuple[Tuple[Tensor], Dict[str, Any]]:
+        y = y[:, -self.model.pred_len:, :]
+        pred_y = self.model(x)
 
-        for epoch in range(self.config.n_epochs):
-            self.log.reset_stat('train')
-            p_bar = tqdm(self.train_data)
-            total_loss = 0
-            for step, batch in enumerate(p_bar):
-                batch = [datum.float().to(self.device) for datum in batch]
+        # loss, soft_dtw_loss, path_dtw_loss = dilate_loss(pred_y, y, normalize=True)
+        # loss = loss.mean()
+        # soft_dtw_loss = soft_dtw_loss.mean()
+        # path_dtw_loss = path_dtw_loss.mean()
 
-                optimizer.zero_grad()
+        soft_dtw_loss = SoftDTW(normalize=False)(pred_y, y)
+        soft_dtw_loss = soft_dtw_loss.mean()
 
-                loss, aux_data = self.criterion(self.model, *batch)
-                loss.backward()
-                optimizer.step()
+        mse_loss = mse(pred_y, y)
+        mse_scale = 100  # 200
 
-                total_loss += loss.item()
+        loss = soft_dtw_loss + mse_scale * mse_loss
 
-                self.log.add_stat('train', aux_data)
+        metrics = {
+            "Loss": loss.item(),
+            "SoftDTW": soft_dtw_loss.item(),
+            # "PathDTW": path_dtw_loss.item(),
+            "MSE": mse_loss.item(),
+            "MAE": mae(pred_y, y).item(),
+        }
 
-                p_bar.set_description_str(
-                    f"[Epoch {epoch}]: Train_loss: {total_loss / (step + 1):.3f}"
-                )
+        return (loss,), metrics
 
-            # scheduler.step()
+    def _step(self, batch: Sequence[torch.Tensor], optimizers: Optional[Sequence[torch.optim.Optimizer]] = None):
+        optimizer, = optimizers or (None,)
+        x, y, *_ = batch
 
-            self.log.scale_stat('train', len(self.train_data))
+        (loss,), aux_data = self.__compute_loss(x, y)
 
-            valid_loss = self.evaluate(self.valid_data, 'valid')
-            test_loss = self.evaluate(self.test_data, 'test', os.path.join(
-                self.PLOT_PATH, f'epoch_{epoch}'))
-            self.log.wandb_log_all()
-            print(
-                f"[Epoch {epoch}]: Valid Loss: {valid_loss:.3f} | Test Loss: {test_loss:.3f}")
+        if optimizer is not None:
+            optimizer.zero_grad()
 
-            if not self.early_stopping.step(valid_loss, self.model, f"checkpoints/{self.experiment_key}"):
-                break
+        if optimizer is not None:
+            loss.backward()
+            optimizer.step()
 
-    def evaluate(self, data: Optional[DataLoader] = None, stat_split: Optional[str] = None, visualization_path: Optional[str] = None):
-        with torch.no_grad():
-            data = self.valid_data if data is None else data
-
-            if stat_split is not None:
-                self.log.reset_stat(stat_split)
-
-            total_loss = 0
-
-            for step, batch in enumerate(data):
-                batch = [datum.float().to(self.device) for datum in batch]
-                loss, aux_data = self.criterion(self.model, *batch)
-                total_loss += loss.item()
-                if stat_split is not None:
-                    self.log.add_stat(stat_split, aux_data)
-
-                if visualization_path is not None:
-                    self.visualize(batch, os.path.join(
-                        visualization_path, f"plot_{step}.png"))
-
-            if stat_split is not None:
-                self.log.scale_stat(stat_split, len(data))
-
-            return total_loss / len(data)
-
-    def test(self):
-        self.early_stopping.load_checkpoint(
-            self.model, f"checkpoints/{self.experiment_key}")
-
-        loss = self.evaluate(self.test_data, 'test',
-                             os.path.join(self.PLOT_PATH, 'test'))
-
-        self.log.wandb_log_all()
-        self.write_all_results()
-
-        return loss
+        return (loss, ), aux_data
 
     def visualize(self, batch: Sequence[torch.Tensor], filepath: str):
         file_dir = '/'.join(filepath.split('/')[:-1])
@@ -158,22 +98,12 @@ class PointIDTrainer(BaseTrainer):
             y = y.detach().cpu()
             y = y[:, -self.model.pred_len:, :]
 
-            # y = torch.concat([x[:, -1:, :], y], dim=-2)
-            # pred = torch.concat([x[:, -1:, :], pred], dim=-2)
             y = torch.concat([x, y], dim=-2)
             pred = torch.concat([x, pred], dim=-2)
 
-            seq_len = self.config.model.seq_len
-            pred_len = self.config.model.pred_len
-
-            # x_ticks = torch.arange(0, seq_len)
-            # y_ticks = torch.arange(seq_len - 1, seq_len + pred_len)
-
-            # plt.plot(x_ticks, x[0, :, -1])
-            # plt.plot(y_ticks, y[0, :, -1])
-            # plt.plot(y_ticks, pred[0, :, -1])
-            plt.plot(y[0, :, -1], label='GroundTruth', linewidth=2)
+            matplotlib.rcParams.update({'font.size': 15})
             plt.plot(pred[0, :, -1], label='Prediction', linewidth=2)
+            plt.plot(y[0, :, -1], label='GroundTruth', linewidth=2)
 
             plt.tight_layout()
             plt.legend()

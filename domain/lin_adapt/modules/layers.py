@@ -1,5 +1,5 @@
 from torch import nn, Tensor
-from domain.common.modules import AdaptiveNorm
+from domain._common.modules.normalization import AdaptiveNorm
 
 
 class ComponentLinAdapt(nn.Module):

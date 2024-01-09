@@ -1,10 +1,10 @@
 import torch
 from torch import nn, Tensor
-from typing import Tuple, Dict, Any, Sequence, Type
-from domain.common.dilate_loss.soft_dtw import SoftDTW
-from domain.common.dilate_loss.dilate import dilate_loss
-from domain.common.modules import SeriesDecomposition, MovingAverage, get_channelwise_modules, AdaptiveNorm
-from domain.common.metrics import mse, mae, kl_divergence
+from typing import Tuple, Dict, Any
+from domain._common.losses.softdtw_loss.soft_dtw_torch import SoftDTW
+from domain._common.utils import get_channelwise_modules
+from domain._common.modules.decomposition import SeriesDecomposition, MovingAverage
+from domain._common.losses.metrics_torch import mse, mae, kl_divergence
 from domain.lin_adapt.modules.layers import ComponentLinAdapt
 from domain.lin_adapt.config import LinAdaptConfig
 
@@ -131,5 +131,11 @@ def compute_loss(model: LinAdapt, *args: Tensor) -> Tuple[Tuple[Tensor, Tensor, 
         "MSE": mse_loss.item(),
         "MAE": mae(pred_y, y).item(),
     }
+    
+    losses = (
+        loss,
+        soft_dtw_loss,
+        mse_loss
+    )
 
-    return (mse_loss, soft_dtw_loss, mse_loss), metrics
+    return losses, metrics

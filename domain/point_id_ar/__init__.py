@@ -1,2 +1,0 @@
-from domain.point_id_ar.config import PointIDARConfig
-from domain.point_id_ar.trainer import PointIDARTrainer
