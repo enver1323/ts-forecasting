@@ -1,9 +1,9 @@
 from train_jax import app as train_app
 
-CONFIG_NAME = 'mamba'
+CONFIG_NAME = 'ssm'
 CONFIG = {
-    'data.dataset.path': 'data/ETTh1_cp.csv',
-    'data.loader': 'change_point',
+    'data.dataset.path': 'data/ETTh1.csv',
+    'data.loader': 'etth',
     'model.n_channels': 7,
     'model.seq_len': 336,
     'model.label_len': 0,
@@ -16,20 +16,20 @@ CONFIG = {
     'model.d_dt': 32,
     'model.patch_size': 24,
     'lr.rec': 0.001,
-    'lr.pred': 0.001,
+    'lr.pred': 0.0006,
     'data.batch_size': 32
 }
 GRID = {
-    'model.seq_len': [96, 192, 336, 720],
-    'model.pred_len': [96, 336],
+    # 'model.seq_len': [96, 192, 336, 720],
+    # 'model.pred_len': [96, 336],
     'model.d_model': [32, 64],
     'model.d_inner': [64, 128],
     'model.d_state': [16, 32],
     'model.d_conv': [4, 8],
     'model.d_dt': [32, 64],
-    'model.patch_size': [16, 24, 48],
-    'lr.rec': [3e-2, 1e-3, 3e-4],
-    'lr.pred': [3e-2, 1e-3, 3e-4],
+    # 'model.patch_size': [16, 24, 48],
+    # 'lr.rec': [3e-2, 1e-3, 3e-4],
+    # 'lr.pred': [3e-2, 1e-3, 3e-4],
 }
 
 best_config = None

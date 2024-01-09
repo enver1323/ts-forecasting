@@ -43,8 +43,8 @@ PARSER_CONFIGS = {
         ('domain.ilinear.config', 'ILinearConfig'),
         ('domain.ilinear.trainer', 'ILinearTrainer')
     ),
-    'mamba': ConfigLoader(
-        ('domain.mamba.config', 'MambaConfig'),
-        ('domain.mamba.trainer', 'MambaTrainer')
+    'ssm': ConfigLoader(
+        ('domain.ssm.config', 'SSMConfig'),
+        ('domain.ssm.trainer', 'SSMTrainer')
     )
 }
