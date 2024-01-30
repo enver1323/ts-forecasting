@@ -48,3 +48,49 @@ class DishTS(eqx.Module):
         temp = (x - phil)/jnp.sqrt(xil + 1e-8)
         rst = temp * self.gamma + self.beta
         return rst
+
+
+class RevIN(eqx.Module):
+    affine_weight: Array
+    affine_bias: Array
+
+    epsilon: float = eqx.field(static=True)
+    affine: bool = eqx.field(static=True)
+
+    def __init__(self, num_features: int, eps: float = 1e-5, affine: bool = True, *, key: jrandom.PRNGKey = None):
+        super(RevIN, self).__init__()
+        self.epsilon = eps
+        self.affine = affine
+
+        self.affine_weight = jnp.ones(num_features)
+        self.affine_bias = jnp.ones(num_features)
+
+    def __call__(self, x: Array):
+        mean, stdev = self._get_statistics(x)
+        x = self.norm(x, (mean, stdev))
+        return x, (mean, stdev)
+
+    def _get_statistics(self, x: Array):
+        axes = tuple(range(x.ndim-1))
+        mean = jax.lax.stop_gradient(x.mean(axis=axes, keepdims=True))
+        stdev = jax.lax.stop_gradient(
+            x.std(axis=axes, keepdims=True) + self.epsilon
+        )
+        return mean, stdev
+
+    def norm(self, x, state):
+        mean, stdev = state
+        x = (x - mean) / stdev
+        if self.affine:
+            x = x * self.affine_weight
+            x = x + self.affine_bias
+        return x
+
+    def denorm(self, x: Array, state):
+        mean, stdev = state
+        if self.affine:
+            x = x - self.affine_bias
+            x = x / (self.affine_weight + self.epsilon*self.epsilon)
+        x = x * stdev
+        x = x + mean
+        return x

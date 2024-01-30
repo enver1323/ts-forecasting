@@ -4,8 +4,9 @@ from typing import Optional, Sequence, Type, Tuple, Dict, Any
 
 import torch
 from torch import Tensor, nn
+from torch.optim import Optimizer
+from torch.optim.lr_scheduler import LRScheduler
 from torch.utils.data import DataLoader
-from tqdm import tqdm
 
 from domain._common.trainers.early_stopping.early_stopping_torch import EarlyStopping
 from generics import BaseTrainer, BaseConfig
@@ -40,21 +41,36 @@ class BaseTorchTrainer(BaseTrainer):
         return self.get_experiment_key(self.config)
 
     @abstractmethod
-    def _get_optimizers(self) -> Sequence[torch.optim.Optimizer]:
+    def _get_optimizers(self) -> Sequence[Optimizer]:
+        pass
+
+    def _get_schedulers(self, optimizers: Sequence[Optimizer]) -> Sequence[Optimizer]:
+        return []
+
+    def _scheduler_step(
+        self,
+        schedulers: Sequence[LRScheduler],
+        optimizers: Sequence[Optimizer],
+        loss: torch.Tensor,
+        epoch: int
+    ):
         pass
 
     @abstractmethod
-    def _step(self, batch: Sequence[torch.Tensor], optimizers: Optional[Sequence[torch.optim.Optimizer]] = None) -> Tuple[Sequence[Tensor], Dict[str, Any]]:
+    def _step(self, batch: Sequence[torch.Tensor], optimizers: Optional[Sequence[Optimizer]] = None) -> Tuple[Sequence[Tensor], Dict[str, Any]]:
         pass
 
     def train(self):
+        model_state = self.model.training
+        self.model.train()
+
         optimizers = self._get_optimizers()
+        schedulers = self._get_schedulers(optimizers)
 
         for epoch in range(self.config.n_epochs):
             self.log.reset_stat('train')
-            p_bar = tqdm(self.train_data)
             total_loss = 0
-            for step, batch in enumerate(p_bar):
+            for batch in self.train_data:
                 batch = [datum.float().to(self.device) for datum in batch]
                 losses, aux_data = self._step(batch, optimizers)
 
@@ -62,22 +78,22 @@ class BaseTorchTrainer(BaseTrainer):
 
                 self.log.add_stat('train', aux_data)
 
-                p_bar.set_description_str(
-                    f"[Epoch {epoch}]: Train_loss: {total_loss / (step + 1):.3f}"
-                )
-
             self.log.scale_stat('train', len(self.train_data))
+            self.log.show_stat('train')
 
             valid_loss = self.evaluate(self.valid_data, 'valid')
-            test_loss = self.evaluate(self.test_data, 'test', os.path.join(
-                self.PLOT_PATH, f'epoch_{epoch}'))
-            print(
-                f"[Epoch {epoch}]: Valid Loss: {valid_loss:.3f} | Test Loss: {test_loss:.3f}")
+            test_loss = self.evaluate(self.test_data, 'test')
+
+            self._scheduler_step(schedulers, optimizers, valid_loss, epoch)
 
             if not self.early_stopping.step(valid_loss, self.model, f"checkpoints/{self.experiment_key}"):
                 break
 
+        self.model.train(model_state)
+
     def evaluate(self, data: Optional[DataLoader] = None, stat_split: Optional[str] = None, visualization_path: Optional[str] = None):
+        model_state = self.model.training
+        self.model.eval()
         with torch.no_grad():
             data = self.valid_data if data is None else data
 
@@ -99,11 +115,14 @@ class BaseTorchTrainer(BaseTrainer):
 
             if stat_split is not None:
                 self.log.scale_stat(stat_split, len(data))
+                self.log.show_stat(stat_split)
 
-            return total_loss / len(data)
+        self.model.train(model_state)
+        return total_loss / len(data)
 
     def test(self):
-        self.early_stopping.load_checkpoint(self.model, f"checkpoints/{self.experiment_key}")
+        self.early_stopping.load_checkpoint(
+            self.model, f"checkpoints/{self.experiment_key}")
         loss = self.evaluate(self.test_data, 'test',
                              os.path.join(self.PLOT_PATH, 'test'))
 

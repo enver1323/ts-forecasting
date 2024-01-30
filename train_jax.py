@@ -3,11 +3,15 @@ import torch
 import numpy as np
 import os
 from argparse import Namespace
+import jax
 from jax import random as jrandom
 from typing import Optional, Type, Tuple
 from generics import BaseConfig, BaseTrainer
 
-os.environ["XLA_PYTHON_CLIENT_MEM_FRACTION"]="0.1"
+os.environ["XLA_PYTHON_CLIENT_MEM_FRACTION"] = "0.1"
+
+# jax.config.update("jax_disable_jit", True)
+jax.config.update("jax_enable_x64", True)
 
 
 def get_trainer_config(*args, **kwargs) -> Tuple[Optional[BaseConfig], Optional[Type[BaseTrainer]]]:
@@ -20,6 +24,7 @@ def get_trainer_config(*args, **kwargs) -> Tuple[Optional[BaseConfig], Optional[
     print("Loading app configuration ...")
 
     return config, trainer
+
 
 def app(*args, **kwargs):
     config, trainer_type = get_trainer_config(*args, **kwargs)
@@ -41,4 +46,3 @@ def app(*args, **kwargs):
 
 if __name__ == '__main__':
     app()
-

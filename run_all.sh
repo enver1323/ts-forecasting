@@ -1,16 +1,16 @@
 scripts=(
-    # "electricity.sh"
-    # "etth1.sh"
-    # "etth2.sh"
-    # "ettm1.sh"
-    # "ettm2.sh"
-    "exchange.sh"
     "illness.sh"
-    # "traffic.sh"
     "weather.sh"
+    "electricity.sh"
+    "traffic.sh"
+    "etth2.sh"
+    "ettm1.sh"
+    "ettm2.sh"
+    "etth1.sh"
+    "exchange.sh"
 )
 
 for script in ${scripts[@]};
 do
-    bash "scripts/${script}"
+    bash "scripts/rec_enc/${script}"
 done

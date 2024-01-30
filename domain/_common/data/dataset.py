@@ -6,11 +6,12 @@ from sklearn.preprocessing import StandardScaler
 import numpy as np
 from enum import Enum
 from typing import Type, Dict, Callable, Tuple, List
+from statsmodels.tsa.seasonal import MSTL
 
 
 class SequenceSize(NamedTuple):
-    source_len: int
-    overlap_len: int
+    seq_len: int
+    label_len: int
     pred_len: int
 
 
@@ -31,7 +32,7 @@ class CommonTSDataset(Dataset):
     ):
         super(CommonTSDataset, self).__init__()
 
-        self.source_len, self.overlap_len, self.pred_len = size
+        self.seq_len, self.overlap_len, self.pred_len = size
 
         self.size = size
         self.data_split = data_split
@@ -57,8 +58,8 @@ class CommonTSDataset(Dataset):
 
         return {
             DataSplit.train: slice(0, train_len),
-            DataSplit.valid: slice(train_len - self.source_len, train_len + valid_len),
-            DataSplit.test: slice(train_len + valid_len - self.source_len, train_len + valid_len + test_len),
+            DataSplit.valid: slice(train_len - self.seq_len, train_len + valid_len),
+            DataSplit.test: slice(train_len + valid_len - self.seq_len, train_len + valid_len + test_len),
         }
 
     def _scale_data(self, train_df: pd.DataFrame, target_df: pd.DataFrame) -> np.ndarray:
@@ -102,7 +103,7 @@ class CommonTSDataset(Dataset):
         self.date_data = date_df
 
     def __getitem__(self, idx):
-        source_slice = slice(idx, idx + self.source_len)
+        source_slice = slice(idx, idx + self.seq_len)
         target_slice = slice(source_slice.stop - self.overlap_len,
                              source_slice.stop + self.pred_len)
         return (
@@ -114,7 +115,7 @@ class CommonTSDataset(Dataset):
         )
 
     def __len__(self):
-        entry_len = self.source_len + self.pred_len
+        entry_len = self.seq_len + self.pred_len
         return len(self.data) - entry_len + 1
 
     def inverse_scale(self, data):
@@ -124,7 +125,7 @@ class CommonTSDataset(Dataset):
         return self.scaler.inverse_transform(data)
 
 
-class ETTHDataset(CommonTSDataset):
+class ETThDataset(CommonTSDataset):
     def __init__(
         self,
         path: str,
@@ -141,7 +142,7 @@ class ETTHDataset(CommonTSDataset):
                 test_len=4 * month
             )
 
-        super(ETTHDataset, self).__init__(
+        super(ETThDataset, self).__init__(
             path=path,
             size=size,
             data_split=data_split,
@@ -150,7 +151,7 @@ class ETTHDataset(CommonTSDataset):
         )
 
 
-class ETTMDataset(CommonTSDataset):
+class ETTmDataset(CommonTSDataset):
     def __init__(
         self,
         path: str,
@@ -167,7 +168,7 @@ class ETTMDataset(CommonTSDataset):
                 test_len=4 * month
             )
 
-        super(ETTMDataset, self).__init__(
+        super(ETTmDataset, self).__init__(
             path=path,
             size=size,
             data_split=data_split,
@@ -189,7 +190,7 @@ class ContextDataset(CommonTSDataset):
             context_size, 0, 0), data_split=data_split, split_sizes=split_sizes, scale=scale)
 
     def __gettitem__(self, idx):
-        context_slice = slice(idx, idx + self.source_len)
+        context_slice = slice(idx, idx + self.seq_len)
 
         return (
             self.data[context_slice],
@@ -251,7 +252,7 @@ class ChangePointDataset(CommonTSDataset):
         self.cp_data = cp_df.values
 
     def __getitem__(self, idx):
-        source_slice = slice(idx, idx + self.source_len)
+        source_slice = slice(idx, idx + self.seq_len)
         target_slice = slice(source_slice.stop - self.overlap_len,
                              source_slice.stop + self.pred_len)
         return (
@@ -286,10 +287,11 @@ class PatchAlignedDataset(CommonTSDataset):
 
     def __get_item__(self, idx: int):
         data_split = self._get_data_splits()[self.data_split]
-        src_start = self.patch_size - (idx + data_split.start) % self.patch_size
+        src_start = self.patch_size - \
+            (idx + data_split.start) % self.patch_size
         src_start = idx + src_start
         source_slice = slice(src_start, src_start +
-                             self.source_len - self.patch_size)
+                             self.seq_len - self.patch_size)
 
         overlap_len = self.overlap_len - self.overlap_len % self.patch_size
         pred_len = self.pred_len - self.pred_len % self.patch_size
@@ -305,13 +307,60 @@ class PatchAlignedDataset(CommonTSDataset):
         )
 
 
+class MSTLDataset(CommonTSDataset):
+    def __init__(
+        self,
+        path: str,
+        size: SequenceSize,
+        data_split: DataSplit,
+        split_sizes: Optional[DataSplitSize] = None,
+        scale: bool = True,
+        patch_size: int = 24,
+    ):
+        super(MSTLDataset, self).__init__(
+            path=path,
+            size=size,
+            data_split=data_split,
+            split_sizes=split_sizes,
+            scale=scale,
+        )
+        self.patch_size = patch_size
+
+    def __getitem__(self, idx: int):
+        x, y, x_date, y_date, idx = super().__getitem__(idx)
+
+        trend, seasonal1, seasonal2, resid = [], [], [], []
+        for i in range(x.shape[-1]):
+            res = MSTL(x[:, i], periods=[24, 168]).fit()
+            trend.append(res.trend)
+            seasonal1.append(res.seasonal[:, 0])
+            seasonal2.append(res.seasonal[:, 1])
+            resid.append(res.resid)
+
+        trend = np.stack(trend, axis=-1)
+        seasonal1 = np.stack(seasonal1, axis=-1)
+        seasonal2 = np.stack(seasonal2, axis=-1)
+        resid = np.stack(resid, axis=-1)
+
+        return (
+            x,
+            trend,
+            seasonal1,
+            seasonal2,
+            resid,
+            y,
+            idx
+        )
+
+
 class DatasetLoaders(Enum):
-    etth = ('etth', ETTHDataset)
-    ettm = ('ettm', ETTMDataset)
+    etth = ('etth', ETThDataset)
+    ettm = ('ettm', ETTmDataset)
     common = ('common', CommonTSDataset)
     context = ('context', ContextDataset)
     change_point = ('change_point', ChangePointDataset)
     patch_aligned = ('patch_aligned', PatchAlignedDataset)
+    mstl = ('mstl', MSTLDataset)
 
     def __init__(self, key: str, config: Type[CommonTSDataset]):
         self.key = key

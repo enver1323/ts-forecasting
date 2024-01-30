@@ -1,12 +1,12 @@
 from abc import abstractmethod
 from dataclasses import asdict
-from tqdm import tqdm
 import os
 from typing import Any, Dict, Optional, Sequence, Tuple, Type
 
 import numpy as np
 from jaxtyping import Array
 import jax
+import jax.random as jrandom
 from jax.random import KeyArray
 import equinox as eqx
 import optax
@@ -14,7 +14,7 @@ from torch.utils.data import DataLoader
 
 from domain._common.trainers.early_stopping.early_stopping_jax import EarlyStopping
 from domain._common.data.np_loader import NumpyLoader
-from domain._common.data.dataset import DataSplit, DATASET_LOADER_KEY_MAP, CommonTSDataset
+from domain._common.data.dataset import DataSplit, CommonTSDataset
 from generics._base_trainer import BaseTrainer
 from generics._base_config import BaseConfig
 
@@ -22,7 +22,7 @@ from generics._base_config import BaseConfig
 class BaseJaxTrainer(BaseTrainer):
     def __init__(self, config: BaseConfig, key: KeyArray):
         super(BaseJaxTrainer, self).__init__(config)
-        self.key = key
+        self.key, self.train_key = jrandom.split(key, 2)
 
         self.model: eqx.Module = self.model_type(
             self.config.model, key=self.key)
@@ -64,10 +64,13 @@ class BaseJaxTrainer(BaseTrainer):
     @abstractmethod
     def _step(
         self,
+        model: eqx.Module,
         batch: Sequence[Array],
         optimizers: Optional[Sequence[
             Tuple[optax.GradientTransformation, optax.OptState]
-        ]] = None
+        ]] = None,
+        *,
+        key: Optional[KeyArray] = None
     ) -> Tuple[Tuple[Array, ...], Dict[str, Any]]:
         pass
 
@@ -76,20 +79,15 @@ class BaseJaxTrainer(BaseTrainer):
 
         for epoch in range(self.config.n_epochs):
             self.log.reset_stat('train')
-            # p_bar = tqdm(self.train_data)
             total_loss = 0
-            # for step, batch in enumerate(p_bar):
-            for step, batch in enumerate(self.train_data):
+            for batch in self.train_data:
+                _, self.train_key = jrandom.split(self.train_key, 2)
                 self.model, loss, aux_data = self._step(
-                    self.model, batch, optimizers_w_states)
+                    self.model, batch, optimizers_w_states, key=self.train_key)
 
                 total_loss += np.asarray(loss)
 
                 self.log.add_stat('train', aux_data)
-
-                # p_bar.set_description_str(
-                #     f"[Epoch {epoch}]: Train_loss: {total_loss / (step + 1):.3f}"
-                # )
 
             self.log.scale_stat('train', len(self.train_data))
             self.log.show_stat('train')
@@ -98,7 +96,7 @@ class BaseJaxTrainer(BaseTrainer):
             #     self.PLOT_PATH, f'epoch_{epoch}'))
             valid_loss = self.evaluate(self.valid_data, 'valid')
             test_loss = self.evaluate(self.test_data, 'test')
-            
+
             print(
                 f"[Epoch {epoch}]: Valid Loss: {valid_loss:.3f} | Test Loss: {test_loss:.3f}")
 
@@ -106,6 +104,7 @@ class BaseJaxTrainer(BaseTrainer):
                 break
 
     def evaluate(self, data: Optional[DataLoader] = None, stat_split: Optional[str] = None, visualization_path: Optional[str] = None):
+        self.model = eqx.nn.inference_mode(self.model)
         data = self.valid_data if data is None else data
 
         if stat_split is not None:
@@ -124,6 +123,8 @@ class BaseJaxTrainer(BaseTrainer):
                 self.visualize(batch, os.path.join(
                     visualization_path, f"plot_{step}.png"))
 
+        self.model = eqx.nn.inference_mode(self.model, value=False)
+
         if stat_split is not None:
             self.log.scale_stat(stat_split, len(data))
             self.log.show_stat(stat_split)
@@ -134,8 +135,10 @@ class BaseJaxTrainer(BaseTrainer):
         self.model = self.early_stopping.load_checkpoint(
             self.model, f"checkpoints/{self.experiment_key}")
 
-        loss = self.evaluate(self.test_data, 'test',
-                             os.path.join(self.PLOT_PATH, 'test'))
+        loss = self.evaluate(
+            self.test_data, 'test', os.path.join(self.PLOT_PATH, 'test')
+        )
+        # loss = self.evaluate(self.test_data, 'test')
 
         self.write_all_results()
 

@@ -3,7 +3,7 @@ from dataclasses import dataclass, asdict, field
 
 @dataclass
 class BaseConfig:
-    seed: int = 1024
+    seed: int = 2021
 
     @dataclass
     class DataConfig:

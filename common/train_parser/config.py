@@ -46,5 +46,17 @@ PARSER_CONFIGS = {
     'ssm': ConfigLoader(
         ('domain.ssm.config', 'SSMConfig'),
         ('domain.ssm.trainer', 'SSMTrainer')
+    ),
+    'rec_enc': ConfigLoader(
+        ('domain.rec_enc.config', 'RecEncConfig'),
+        ('domain.rec_enc.trainer', 'RecEncTrainer')
+    ),
+    'mdlinear': ConfigLoader(
+        ('domain.mdlinear.config', 'MDLinearConfig'),
+        ('domain.mdlinear.trainer', 'MDLinearTrainer')
+    ),
+    'slider': ConfigLoader(
+        ('domain.slider.config', 'SliderConfig'),
+        ('domain.slider.trainer', 'SliderTrainer')
     )
 }

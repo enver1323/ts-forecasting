@@ -5,6 +5,7 @@ import os
 from argparse import Namespace
 from typing import Optional, Type, Tuple
 from generics import BaseConfig, BaseTrainer
+import random
 
 os.environ["XLA_PYTHON_CLIENT_MEM_FRACTION"]="0.7"
 
@@ -26,6 +27,7 @@ def app(*args, **kwargs):
         return
 
     seed_val = config.seed
+    random.seed(seed_val)
     torch.manual_seed(seed_val)
     np.random.seed(seed_val)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

@@ -42,8 +42,8 @@ class PointIDARConfig(BaseConfig):
 
     def __post_init__(self):
         self.data.dataset.size = SequenceSize(
-            source_len=self.model.seq_len,
-            overlap_len=self.model.label_len,
+            seq_len=self.model.seq_len,
+            label_len=self.model.label_len,
             pred_len=self.model.pred_len
         )
         assert self.data.loader in DATASET_LOADER_KEY_MAP
