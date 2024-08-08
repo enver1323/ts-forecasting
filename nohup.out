@@ -1,0 +1,345 @@
+Namespace(config='dist_match', seed=2021, n_epochs=100, patience=10, n_stat_epochs=10, **{'data.dataset.path': 'data/ETTh1.csv', 'data.dataset.size': <dataclasses._MISSING_TYPE object at 0x7f9b49776e50>, 'data.loader': 'etth', 'data.batch_size': 64, 'model.n_channels': 7, 'model.n_date_channels': 6, 'model.seq_len': 336, 'model.label_len': 0, 'model.pred_len': 96, 'model.patch_len': 24, 'model.dropout': 0.5, 'model.d_model': 512, 'lr.init': 0.001, 'lr.decay': 1.0, 'lr.n_warmup_steps': 10})
+Loading app configuration ...
+DistMatch_ETTh1_(336->96|24)
+train/Loss: 1.597686538589187, train/x_mse: 0.9937300500459969, train/y_mse: 0.999712270218879
+valid/Loss: -0.02122346294480701, valid/x_mse: 1.5288288011107334, valid/y_mse: 1.4859917219295058
+test/Loss: -0.05165226410987765, test/x_mse: 1.077579232149346, test/y_mse: 1.1057804379352303
+[Epoch 0]: Valid Loss: -0.021 | Test Loss: -0.052
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+train/Loss: -0.18128410761710256, train/x_mse: 5.740615836344659, train/y_mse: 5.737131100613624
+valid/Loss: 3207.9204328670057, valid/x_mse: 1.6615549464558446, valid/y_mse: 1.6082981686259425
+test/Loss: 486.05715232671696, test/x_mse: 1.1532082252724225, test/y_mse: 1.184011694996856
+[Epoch 1]: Valid Loss: 3207.920 | Test Loss: 486.057
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 1 / 10
+train/Loss: 54.559127118904144, train/x_mse: 0.997204976156354, train/y_mse: 1.0030060750432312
+valid/Loss: 1.4720070722491243, valid/x_mse: 1.5335580470950105, valid/y_mse: 1.4923409528510516
+test/Loss: 0.6824318447778391, test/x_mse: 1.0874303260514901, test/y_mse: 1.1160542978796848
+[Epoch 2]: Valid Loss: 1.472 | Test Loss: 0.682
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 2 / 10
+train/Loss: 0.08538222865900025, train/x_mse: 0.9898798950016499, train/y_mse: 0.9949504868127406
+valid/Loss: 0.9581303180650224, valid/x_mse: 1.529398798942566, valid/y_mse: 1.4894515830417012
+test/Loss: 0.3596901931734972, test/x_mse: 1.0844046736872472, test/y_mse: 1.1129729512125948
+[Epoch 3]: Valid Loss: 0.958 | Test Loss: 0.360
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 3 / 10
+train/Loss: -0.03230211517075077, train/x_mse: 0.9879963579587638, train/y_mse: 0.9929906711913645
+valid/Loss: 0.6861216107080149, valid/x_mse: 1.5294568566388862, valid/y_mse: 1.4854180258373881
+test/Loss: 0.20955046907413838, test/x_mse: 1.08298970239107, test/y_mse: 1.1115338594414468
+[Epoch 4]: Valid Loss: 0.686 | Test Loss: 0.210
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 4 / 10
+train/Loss: -0.09787652548402548, train/x_mse: 0.9872389831580222, train/y_mse: 0.9923085202462971
+valid/Loss: 0.4929154705862666, valid/x_mse: 1.529346923495448, valid/y_mse: 1.483297960702763
+test/Loss: 0.12054524657338164, test/x_mse: 1.0820536752079808, test/y_mse: 1.110578521739605
+[Epoch 5]: Valid Loss: 0.493 | Test Loss: 0.121
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 5 / 10
+train/Loss: -0.1422932876739651, train/x_mse: 0.9860247941687703, train/y_mse: 0.9909056117758155
+valid/Loss: 0.36897319936475087, valid/x_mse: 1.526534352191659, valid/y_mse: 1.4855423528094625
+test/Loss: 0.059653828830219975, test/x_mse: 1.0810123030529466, test/y_mse: 1.1095009834267373
+[Epoch 6]: Valid Loss: 0.369 | Test Loss: 0.060
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 6 / 10
+train/Loss: -0.17477093683555722, train/x_mse: 0.984512903727591, train/y_mse: 0.9896712168119848
+valid/Loss: 0.2681220102795335, valid/x_mse: 1.5232672802237577, valid/y_mse: 1.4812158567960871
+test/Loss: 0.012178829762824746, test/x_mse: 1.080025550930999, test/y_mse: 1.1084759789843892
+[Epoch 7]: Valid Loss: 0.268 | Test Loss: 0.012
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 7 / 10
+train/Loss: -0.20039454300422221, train/x_mse: 0.9834402166306973, train/y_mse: 0.9882267587818205
+valid/Loss: 0.1955110468836718, valid/x_mse: 1.5198618173599243, valid/y_mse: 1.4771611524182697
+test/Loss: -0.026505355225052943, test/x_mse: 1.0783857883409012, test/y_mse: 1.1067687480948691
+[Epoch 8]: Valid Loss: 0.196 | Test Loss: -0.027
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 8 / 10
+train/Loss: -0.2207142332335934, train/x_mse: 0.9811644619330764, train/y_mse: 0.9860757682472467
+valid/Loss: 0.14002957697524582, valid/x_mse: 1.5184710247572077, valid/y_mse: 1.471371988917506
+test/Loss: -0.057806516282780225, test/x_mse: 1.0763759834821833, test/y_mse: 1.1046784367672233
+[Epoch 9]: Valid Loss: 0.140 | Test Loss: -0.058
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 9 / 10
+train/Loss: -0.2001062403433025, train/x_mse: 0.9626074321568012, train/y_mse: 0.967445622663945, train/pred_loss: 0.7939484668895602
+valid/Loss: 0.23888929915982623, valid/x_mse: 1.4655246984126955, valid/y_mse: 1.4249602972074997, valid/pred_loss: 1.2785280388455058
+test/Loss: -0.04516307507143464, test/x_mse: 1.0493211399677187, test/y_mse: 1.0768197650133178, test/pred_loss: 0.7832495965236841
+[Epoch 10]: Valid Loss: 1.279 | Test Loss: 0.783
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+train/Loss: -0.18932228069752455, train/x_mse: 0.9314241190440953, train/y_mse: 0.935735902749002, train/pred_loss: 0.5781439575366676
+valid/Loss: 0.30357398647208544, valid/x_mse: 1.4011414466902268, valid/y_mse: 1.3650117364040641, valid/pred_loss: 1.1226069844046305
+test/Loss: -0.05387779515843059, test/x_mse: 1.020083324853764, test/y_mse: 1.0467075386712716, test/pred_loss: 0.7208901754645414
+[Epoch 11]: Valid Loss: 1.123 | Test Loss: 0.721
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+train/Loss: -0.16909363260492682, train/x_mse: 0.8762413319200277, train/y_mse: 0.8806361751630902, train/pred_loss: 0.5211456108372658
+valid/Loss: 0.5409154039482738, valid/x_mse: 1.2790112523145454, valid/y_mse: 1.245883958284245, valid/pred_loss: 1.0246709779251453
+test/Loss: -0.032192523396292395, test/x_mse: 0.956716914509618, test/y_mse: 0.9817623752494191, test/pred_loss: 0.6852155106012211
+[Epoch 12]: Valid Loss: 1.025 | Test Loss: 0.685
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+train/Loss: -0.09442272153683007, train/x_mse: 0.7203710563480854, train/y_mse: 0.7266849698498845, train/pred_loss: 0.49493673956021667
+valid/Loss: 0.9585676595222118, valid/x_mse: 0.9125946552254433, valid/y_mse: 0.8917630841565687, valid/pred_loss: 0.9792079689890839
+test/Loss: 0.06387999030046684, test/x_mse: 0.7530067299687585, test/y_mse: 0.7731826402420221, test/pred_loss: 0.6846782059170479
+[Epoch 13]: Valid Loss: 0.979 | Test Loss: 0.685
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+train/Loss: -0.10696143936365843, train/x_mse: 0.4390222674701363, train/y_mse: 0.44591031433083117, train/pred_loss: 0.49139400152489543
+valid/Loss: 0.2720031623923501, valid/x_mse: 0.6721248155416444, valid/y_mse: 0.6676516934882762, valid/pred_loss: 1.0155629681986431
+test/Loss: -0.04772166387979374, test/x_mse: 0.6315756169862525, test/y_mse: 0.6485818579446437, test/pred_loss: 0.6886620687883954
+[Epoch 14]: Valid Loss: 1.016 | Test Loss: 0.689
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 1 / 10
+train/Loss: -0.216763673000969, train/x_mse: 0.3795318710617721, train/y_mse: 0.38638733024708927, train/pred_loss: 0.4722004705108702
+valid/Loss: 0.10234515126361403, valid/x_mse: 0.6426866941673811, valid/y_mse: 0.638341837151106, valid/pred_loss: 0.9582938413287319
+test/Loss: -0.11611035882040512, test/x_mse: 0.6095191794772481, test/y_mse: 0.6257231737985167, test/pred_loss: 0.6648699031319729
+[Epoch 15]: Valid Loss: 0.958 | Test Loss: 0.665
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+train/Loss: -0.25340825191233307, train/x_mse: 0.3648174770642072, train/y_mse: 0.3714585832785815, train/pred_loss: 0.4570959033444524
+valid/Loss: 0.046887655590855795, valid/x_mse: 0.6268272302871527, valid/y_mse: 0.6223195070444152, valid/pred_loss: 0.9466400700946187
+test/Loss: -0.15581538147011467, test/x_mse: 0.5952232064202775, test/y_mse: 0.6109907668690349, test/pred_loss: 0.6443403120650801
+[Epoch 16]: Valid Loss: 0.947 | Test Loss: 0.644
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+train/Loss: -0.2770104599185288, train/x_mse: 0.3564260823186487, train/y_mse: 0.36310916650108993, train/pred_loss: 0.4464683055412024
+valid/Loss: -0.024294766229252484, valid/x_mse: 0.6155734491902728, valid/y_mse: 0.6131154174028441, valid/pred_loss: 0.9481914085011149
+test/Loss: -0.188508105312669, test/x_mse: 0.5871960357871167, test/y_mse: 0.6026254032933435, test/pred_loss: 0.6404917219350504
+[Epoch 17]: Valid Loss: 0.948 | Test Loss: 0.640
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 1 / 10
+train/Loss: -0.29423694941215217, train/x_mse: 0.35034730192273855, train/y_mse: 0.3567879132460803, train/pred_loss: 0.4364027918782085
+valid/Loss: -0.06074550037467202, valid/x_mse: 0.6068466264148091, valid/y_mse: 0.6034802461779395, valid/pred_loss: 0.9445287945658661
+test/Loss: -0.21043075118647064, test/x_mse: 0.5769792427850324, test/y_mse: 0.5924222098533497, test/pred_loss: 0.6338888933492262
+[Epoch 18]: Valid Loss: 0.945 | Test Loss: 0.634
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+train/Loss: -0.30614058021456003, train/x_mse: 0.3450258809607476, train/y_mse: 0.3514378019608557, train/pred_loss: 0.429147070273757
+valid/Loss: -0.07578391113946605, valid/x_mse: 0.5913935483888139, valid/y_mse: 0.5888791333797366, valid/pred_loss: 0.940451207549073
+test/Loss: -0.21908307266096735, test/x_mse: 0.56501098081123, test/y_mse: 0.5802532514167387, test/pred_loss: 0.6157790810562843
+[Epoch 19]: Valid Loss: 0.940 | Test Loss: 0.616
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+train/Loss: -0.3101121550425887, train/x_mse: 0.3412434933707118, train/y_mse: 0.34770528436638415, train/pred_loss: 0.4190818623173982
+valid/Loss: -0.09982169194276942, valid/x_mse: 0.5770649674326874, valid/y_mse: 0.5732375494269437, valid/pred_loss: 0.9094380445258562
+test/Loss: -0.22157831888559254, test/x_mse: 0.5551175592943679, test/y_mse: 0.5701843462018079, test/pred_loss: 0.6071583587069844
+[Epoch 20]: Valid Loss: 0.909 | Test Loss: 0.607
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+train/Loss: -0.30685306910891086, train/x_mse: 0.33733705803751945, train/y_mse: 0.34361734380945563, train/pred_loss: 0.40837058890610933
+valid/Loss: -0.09942566308864327, valid/x_mse: 0.5563359607097714, valid/y_mse: 0.5541655726211016, valid/pred_loss: 0.8808419829191163
+test/Loss: -0.21647495273933853, test/x_mse: 0.5390148121257161, test/y_mse: 0.5539874018624772, test/pred_loss: 0.5821723418180332
+[Epoch 21]: Valid Loss: 0.881 | Test Loss: 0.582
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+train/Loss: -0.2946771694114432, train/x_mse: 0.3322392029222101, train/y_mse: 0.33749440568499267, train/pred_loss: 0.395645136712119
+valid/Loss: -0.05032220777384071, valid/x_mse: 0.5359014445959136, valid/y_mse: 0.5323992329974507, valid/pred_loss: 0.8814912216607914
+test/Loss: -0.197422806433467, test/x_mse: 0.5180718451738358, test/y_mse: 0.5325798257145771, test/pred_loss: 0.5573891553767892
+[Epoch 22]: Valid Loss: 0.881 | Test Loss: 0.557
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 1 / 10
+train/Loss: -0.2857118844985962, train/x_mse: 0.3155921834986657, train/y_mse: 0.32078008633106947, train/pred_loss: 0.38795383274555206
+valid/Loss: 0.033706367362377254, valid/x_mse: 0.47811032866322717, valid/y_mse: 0.47548496445944144, valid/pred_loss: 0.8180064392644305
+test/Loss: -0.17283804905275965, test/x_mse: 0.47540810946808304, test/y_mse: 0.48910807766193565, test/pred_loss: 0.5339178692462833
+[Epoch 23]: Valid Loss: 0.818 | Test Loss: 0.534
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+train/Loss: -0.2775765529368073, train/x_mse: 0.2855514114489779, train/y_mse: 0.2894634648691863, train/pred_loss: 0.38886678661219776
+valid/Loss: -0.055988789471082906, valid/x_mse: 0.4079912838547729, valid/y_mse: 0.40583320689755814, valid/pred_loss: 0.8360740542411804
+test/Loss: -0.1902755698145822, test/x_mse: 0.40679651394832966, test/y_mse: 0.41933284769224566, test/pred_loss: 0.5408468821714091
+[Epoch 24]: Valid Loss: 0.836 | Test Loss: 0.541
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 1 / 10
+train/Loss: -0.26773374422919005, train/x_mse: 0.264033283572644, train/y_mse: 0.26905633229762316, train/pred_loss: 0.3902082641143352
+valid/Loss: -0.11413483858801597, valid/x_mse: 0.37672543595003527, valid/y_mse: 0.37466790648393855, valid/pred_loss: 0.840258960113969
+test/Loss: -0.2189767300042995, test/x_mse: 0.3770157594320386, test/y_mse: 0.38993990975756976, test/pred_loss: 0.5357125186642935
+[Epoch 25]: Valid Loss: 0.840 | Test Loss: 0.536
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 2 / 10
+train/Loss: -0.2903745052171871, train/x_mse: 0.24712954321876168, train/y_mse: 0.2509423695737496, train/pred_loss: 0.37754758121445775
+valid/Loss: -0.0595960577213487, valid/x_mse: 0.3503175883792167, valid/y_mse: 0.3474993892880373, valid/pred_loss: 0.7942612489988637
+test/Loss: -0.20337410392456276, test/x_mse: 0.3532137163849764, test/y_mse: 0.3655179215725078, test/pred_loss: 0.5206729582575864
+[Epoch 26]: Valid Loss: 0.794 | Test Loss: 0.521
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+train/Loss: -0.27296862355433404, train/x_mse: 0.22646423755213618, train/y_mse: 0.22976993676275015, train/pred_loss: 0.3803127857390791
+valid/Loss: -0.008143756971802823, valid/x_mse: 0.265939527819323, valid/y_mse: 0.26571848607340526, valid/pred_loss: 0.805727199066517
+test/Loss: -0.1808415841917659, test/x_mse: 0.2805058172968931, test/y_mse: 0.2913828750335893, test/pred_loss: 0.5195266618285068
+[Epoch 27]: Valid Loss: 0.806 | Test Loss: 0.520
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 1 / 10
+train/Loss: -0.28985855751670897, train/x_mse: 0.18386167474091053, train/y_mse: 0.1856446930905804, train/pred_loss: 0.37558760633692145
+valid/Loss: -0.03924554742352907, valid/x_mse: 0.19472621797129167, valid/y_mse: 0.19446764886379242, valid/pred_loss: 0.7899213197619416
+test/Loss: -0.2056136013463486, test/x_mse: 0.2119242538546407, test/y_mse: 0.2210056892661161, test/pred_loss: 0.5071420558663302
+[Epoch 28]: Valid Loss: 0.790 | Test Loss: 0.507
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+train/Loss: -0.32049456459935755, train/x_mse: 0.16401529649738222, train/y_mse: 0.16503466910216957, train/pred_loss: 0.3603458823636174
+valid/Loss: -0.20279731306918833, valid/x_mse: 0.19401620016541593, valid/y_mse: 0.19312679767608643, valid/pred_loss: 0.8078545914139859
+test/Loss: -0.2830816391249036, test/x_mse: 0.20226532030244207, test/y_mse: 0.21069074387467185, test/pred_loss: 0.5154479665811672
+[Epoch 29]: Valid Loss: 0.808 | Test Loss: 0.515
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 1 / 10
+train/Loss: -0.3305971483932808, train/x_mse: 0.15980762639082968, train/y_mse: 0.16078906832262874, train/pred_loss: 0.3496314964722842
+valid/Loss: -0.2246026524970698, valid/x_mse: 0.18630973024423733, valid/y_mse: 0.18608779442864795, valid/pred_loss: 0.8065381368925405
+test/Loss: -0.29654760537452474, test/x_mse: 0.18984668095444523, test/y_mse: 0.1974433093916538, test/pred_loss: 0.5124250421690386
+[Epoch 30]: Valid Loss: 0.807 | Test Loss: 0.512
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 2 / 10
+train/Loss: -0.33356312778778374, train/x_mse: 0.15805526525946334, train/y_mse: 0.1591203457210213, train/pred_loss: 0.3474973540287465
+valid/Loss: -0.06808041798513989, valid/x_mse: 0.1772407376488974, valid/y_mse: 0.17681035122206046, valid/pred_loss: 0.767833762390669
+test/Loss: -0.18466296445491703, test/x_mse: 0.17886713822913725, test/y_mse: 0.18626077992971554, test/pred_loss: 0.48013254930806715
+[Epoch 31]: Valid Loss: 0.768 | Test Loss: 0.480
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+train/Loss: -0.34769323212094605, train/x_mse: 0.14996980922296643, train/y_mse: 0.1503141417633742, train/pred_loss: 0.33903559716418386
+valid/Loss: -0.20105599074862723, valid/x_mse: 0.16839500014172043, valid/y_mse: 0.16823569945124692, valid/pred_loss: 0.7760723690653957
+test/Loss: -0.28809182155270907, test/x_mse: 0.1614751620001571, test/y_mse: 0.16784707682077274, test/pred_loss: 0.48524450354797893
+[Epoch 32]: Valid Loss: 0.776 | Test Loss: 0.485
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 1 / 10
+train/Loss: -0.3502371028298512, train/x_mse: 0.15351462154649198, train/y_mse: 0.15366188442567363, train/pred_loss: 0.3381288244854659
+valid/Loss: -0.02308661715928898, valid/x_mse: 0.1935316424730212, valid/y_mse: 0.19293877551721972, valid/pred_loss: 0.7940012563106625
+test/Loss: -0.18951293115699014, test/x_mse: 0.18479523825090985, test/y_mse: 0.19183510108742602, test/pred_loss: 0.49845062785370403
+[Epoch 33]: Valid Loss: 0.794 | Test Loss: 0.498
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 2 / 10
+train/Loss: -0.36791341681964695, train/x_mse: 0.14122238557320088, train/y_mse: 0.14134327421197668, train/pred_loss: 0.32849925896152854
+valid/Loss: -0.2577311822841334, valid/x_mse: 0.17095696614232175, valid/y_mse: 0.17048236242560452, valid/pred_loss: 0.8020195475844449
+test/Loss: -0.332261988070122, test/x_mse: 0.1688006688342538, test/y_mse: 0.17594230712153192, test/pred_loss: 0.48734697283700457
+[Epoch 34]: Valid Loss: 0.802 | Test Loss: 0.487
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 3 / 10
+train/Loss: -0.36403630091808736, train/x_mse: 0.1472112640622072, train/y_mse: 0.14769446273567155, train/pred_loss: 0.3301441874355078
+valid/Loss: -0.2926015798435655, valid/x_mse: 0.15120528430439706, valid/y_mse: 0.15109051001626392, valid/pred_loss: 0.782643900361172
+test/Loss: -0.3446693163971568, test/x_mse: 0.15273571984712467, test/y_mse: 0.15923912511315458, test/pred_loss: 0.48056977294212166
+[Epoch 35]: Valid Loss: 0.783 | Test Loss: 0.481
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 4 / 10
+train/Loss: -0.3797846764791757, train/x_mse: 0.14064145681913942, train/y_mse: 0.1408595017855987, train/pred_loss: 0.3232816499657929
+valid/Loss: -0.2978064542592958, valid/x_mse: 0.1574198936307153, valid/y_mse: 0.15735808707946955, valid/pred_loss: 0.8060362505358319
+test/Loss: -0.34011066133199735, test/x_mse: 0.15741020025208938, test/y_mse: 0.16415452870518663, test/pred_loss: 0.5000755544318709
+[Epoch 36]: Valid Loss: 0.806 | Test Loss: 0.500
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 5 / 10
+train/Loss: -0.3759308303706348, train/x_mse: 0.14303613547235727, train/y_mse: 0.1437282501719892, train/pred_loss: 0.3256400756072253
+valid/Loss: -0.320376981829488, valid/x_mse: 0.14453931499359218, valid/y_mse: 0.14440073592718258, valid/pred_loss: 0.7865636625955271
+test/Loss: -0.3577765314731487, test/x_mse: 0.14491101423668307, test/y_mse: 0.15103562089592912, test/pred_loss: 0.4942330447740333
+[Epoch 37]: Valid Loss: 0.787 | Test Loss: 0.494
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 6 / 10
+train/Loss: -0.383226863341406, train/x_mse: 0.14094275736715645, train/y_mse: 0.1416761267464608, train/pred_loss: 0.32254489208571613
+valid/Loss: -0.2777832226697789, valid/x_mse: 0.1467574938785198, valid/y_mse: 0.1468009054660797, valid/pred_loss: 0.7624836702679478
+test/Loss: -0.3342639949432639, test/x_mse: 0.14838313571242398, test/y_mse: 0.1552569893037164, test/pred_loss: 0.4803209429563478
+[Epoch 38]: Valid Loss: 0.762 | Test Loss: 0.480
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+train/Loss: -0.39392556925304234, train/x_mse: 0.13565862673567608, train/y_mse: 0.1359849498840049, train/pred_loss: 0.31608221400529146
+valid/Loss: -0.31480267366697623, valid/x_mse: 0.19775842649992123, valid/y_mse: 0.197055775758832, valid/pred_loss: 0.8123365529747897
+test/Loss: -0.35883678634499394, test/x_mse: 0.18113494543142097, test/y_mse: 0.18856110267860945, test/pred_loss: 0.4948151901710865
+[Epoch 39]: Valid Loss: 0.812 | Test Loss: 0.495
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 1 / 10
+train/Loss: -0.38970661093480885, train/x_mse: 0.1401592069887556, train/y_mse: 0.14030924922553822, train/pred_loss: 0.31929606199264526
+valid/Loss: -0.19283480786306914, valid/x_mse: 0.17034411153127982, valid/y_mse: 0.16931817074154698, valid/pred_loss: 0.7583693307499553
+test/Loss: -0.31521423507568447, test/x_mse: 0.1608170047402382, test/y_mse: 0.16851513520922773, test/pred_loss: 0.46925798612971636
+[Epoch 40]: Valid Loss: 0.758 | Test Loss: 0.469
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+train/Loss: -0.3992564876098186, train/x_mse: 0.13077095453627408, train/y_mse: 0.1310326648526825, train/pred_loss: 0.3104708145838231
+valid/Loss: -0.3201758584310842, valid/x_mse: 0.14929026781126511, valid/y_mse: 0.14915328074333278, valid/pred_loss: 0.812637981980346
+test/Loss: -0.3572603041349455, test/x_mse: 0.14951702987038812, test/y_mse: 0.1563239771612855, test/pred_loss: 0.4905562442402507
+[Epoch 41]: Valid Loss: 0.813 | Test Loss: 0.491
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 1 / 10
+train/Loss: -0.4020532062277198, train/x_mse: 0.1305489424848929, train/y_mse: 0.13101091276621446, train/pred_loss: 0.308582856785506
+valid/Loss: -0.3382972603620485, valid/x_mse: 0.14177951216697693, valid/y_mse: 0.1415893345378166, valid/pred_loss: 0.7869271843932396
+test/Loss: -0.3685847014881844, test/x_mse: 0.14057879080606062, test/y_mse: 0.14684855556765267, test/pred_loss: 0.49353345535522286
+[Epoch 42]: Valid Loss: 0.787 | Test Loss: 0.494
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 2 / 10
+train/Loss: -0.4019503304734826, train/x_mse: 0.12805663427570835, train/y_mse: 0.12824826734140515, train/pred_loss: 0.30531870340928435
+valid/Loss: -0.318174097427102, valid/x_mse: 0.13889307130214779, valid/y_mse: 0.13876208662986755, valid/pred_loss: 0.792878644410954
+test/Loss: -0.35643160880305047, test/x_mse: 0.1398257218128027, test/y_mse: 0.1456166589849217, test/pred_loss: 0.4810677704422973
+[Epoch 43]: Valid Loss: 0.793 | Test Loss: 0.481
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 3 / 10
+train/Loss: -0.3995768646709621, train/x_mse: 0.11351891426602378, train/y_mse: 0.11420299881137908, train/pred_loss: 0.3021861722227186
+valid/Loss: -0.34356127714001855, valid/x_mse: 0.11423949983923934, valid/y_mse: 0.11401266951200574, valid/pred_loss: 0.7884829571080763
+test/Loss: -0.3732070321607035, test/x_mse: 0.11416443229414695, test/y_mse: 0.11808444741506909, test/pred_loss: 0.4808291924554248
+[Epoch 44]: Valid Loss: 0.788 | Test Loss: 0.481
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 4 / 10
+train/Loss: -0.40201698802411556, train/x_mse: 0.09920043539023027, train/y_mse: 0.09967999061336741, train/pred_loss: 0.30380460526794195
+valid/Loss: -0.2992455529612164, valid/x_mse: 0.1445411377867987, valid/y_mse: 0.14378307032030682, valid/pred_loss: 0.823665855928909
+test/Loss: -0.3601797184971876, test/x_mse: 0.13616557696530984, test/y_mse: 0.1391970870453258, test/pred_loss: 0.5003316818281661
+[Epoch 45]: Valid Loss: 0.824 | Test Loss: 0.500
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 5 / 10
+train/Loss: -0.40317543130367994, train/x_mse: 0.09054272755747661, train/y_mse: 0.09097047836985439, train/pred_loss: 0.29941734322346747
+valid/Loss: -0.3459339536899744, valid/x_mse: 0.0895331434385721, valid/y_mse: 0.08895536737386571, valid/pred_loss: 0.7970226351604905
+test/Loss: -0.3790813911446305, test/x_mse: 0.0905460600069789, test/y_mse: 0.09152291567866193, test/pred_loss: 0.4647083795347879
+[Epoch 46]: Valid Loss: 0.797 | Test Loss: 0.465
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 6 / 10
+train/Loss: -0.41334513132460415, train/x_mse: 0.0857698522740975, train/y_mse: 0.08624638139735907, train/pred_loss: 0.29234937531873584
+valid/Loss: -0.3466814534608708, valid/x_mse: 0.10053093506153239, valid/y_mse: 0.09949426803477975, valid/pred_loss: 0.7741230130195618
+test/Loss: -0.38508602353029475, test/x_mse: 0.09724020767350529, test/y_mse: 0.09828035507437795, test/pred_loss: 0.47301053099854046
+[Epoch 47]: Valid Loss: 0.774 | Test Loss: 0.473
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 7 / 10
+train/Loss: -0.412903702352196, train/x_mse: 0.08757813891861588, train/y_mse: 0.08808482077438384, train/pred_loss: 0.29230961645953357
+valid/Loss: -0.3514486669107925, valid/x_mse: 0.08599554123573525, valid/y_mse: 0.0854306791064351, valid/pred_loss: 0.788678903912389
+test/Loss: -0.3834243075445641, test/x_mse: 0.08642243368681087, test/y_mse: 0.08675262305972188, test/pred_loss: 0.4680111262687417
+[Epoch 48]: Valid Loss: 0.789 | Test Loss: 0.468
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 8 / 10
+train/Loss: -0.4143262307625264, train/x_mse: 0.08714863494969904, train/y_mse: 0.08766640204703435, train/pred_loss: 0.2880626863334328
+valid/Loss: -0.35673667871674825, valid/x_mse: 0.13183604284774425, valid/y_mse: 0.1308600803793863, valid/pred_loss: 0.7940535143364308
+test/Loss: -0.38981218376131943, test/x_mse: 0.12299325022586556, test/y_mse: 0.12445857124619705, test/pred_loss: 0.4818111006603685
+[Epoch 49]: Valid Loss: 0.794 | Test Loss: 0.482
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 9 / 10
+train/Loss: -0.41537812864407897, train/x_mse: 0.08583228255156428, train/y_mse: 0.08624736603815109, train/pred_loss: 0.28469558781944215
+valid/Loss: -0.3630088165748951, valid/x_mse: 0.08502694375293199, valid/y_mse: 0.0844463208733603, valid/pred_loss: 0.8075283377669579
+test/Loss: -0.39179032191980717, test/x_mse: 0.08397949876826863, test/y_mse: 0.08446814076498498, test/pred_loss: 0.49018896665684014
+[Epoch 50]: Valid Loss: 0.808 | Test Loss: 0.490
+Updating learning rate to 0.001
+Updating learning rate to 0.001
+Early Stopping counter: 10 / 10
+DistMatch_ETTh1_(336->96|24)
+test/Loss: -0.31521423507568447, test/x_mse: 0.1608170047402382, test/y_mse: 0.16851513520922773, test/pred_loss: 0.5488331567409427

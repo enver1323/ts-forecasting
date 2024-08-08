@@ -1,36 +1,24 @@
-from train_jax import app as train_app
+from train import app as train_app
 
-CONFIG_NAME = 'ssm'
+CONFIG_NAME = 'denoise_rnn'
 CONFIG = {
-    'data.dataset.path': 'data/national_illness.csv',
-    'data.loader': 'common',
+    'data.dataset.path': 'data/ETTh1.csv',
+    'data.loader': 'etth',
+    'model.seq_len': 720,
+    'model.pred_len': 96,
     'model.n_channels': 7,
-    'model.seq_len': 104,
-    'model.label_len': 0,
-    'model.pred_len': 24,
-    'model.n_blocks': 1,
-    'model.d_model': 32,
-    'model.d_inner': 32,
-    'model.d_state': 32,
-    'model.d_conv': 4,
-    'model.d_dt': 64,
-    'model.patch_size': 4,
-    'lr.rec': 0.001,
-    'lr.pred': 0.0006,
-    'data.batch_size': 16
+    'model.d_model': 512,
+    'model.dropout': 0.5,
+    'model.patch_len': 48,
+    'lr.init': 0.001,
+    'lr.decay': 0.9,
+    'data.batch_size': 256
 }
 GRID = {
-    # 'model.seq_len': [192, 336, 504, 720],
-    # 'model.pred_len': [96, 192, 336, 720],
-    'model.d_model': [16, 32],
-    'model.d_inner': [32, 64],
-    'model.d_state': [16, 32, 64],
-    'model.d_conv': [2, 4],
-    'model.d_dt': [16, 32, 64],
-    'model.patch_size': [4, 8],
-    # 'model.n_blocks': [1,2,3,4],
-    'lr.rec': [1e-3, 6e-4, 3e-4],
-    'lr.pred': [1e-3, 6e-4, 3e-4],
+    'lr.init': [0.001, 0.0006, 0.0003],
+    'model.d_model': [512, 256, 128],
+    'model.dropout': [0.5, 0.2, 0.1],
+    'model.patch_len': [24, 48, 8],
 }
 
 best_config = {}
@@ -61,7 +49,7 @@ def train_step(cur_conf, next_conf):
         train_config = format_train_config(cur_conf)
         try:
             trainer = train_app(train_config)
-            cur_stat = trainer.log.get_stat('test', 'test/pred_loss')
+            cur_stat = trainer.log.get_stat('test', 'test/mse')
             cur_best_config = best_config.get(cur_pred_len, None)
             cur_best_stat = best_stat.get(cur_pred_len, None)
             if cur_best_config is None or cur_best_stat is None or cur_stat < cur_best_stat:

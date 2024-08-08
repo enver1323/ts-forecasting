@@ -7,7 +7,6 @@ import numpy as np
 from jaxtyping import Array
 import jax
 import jax.random as jrandom
-from jax.random import KeyArray
 import equinox as eqx
 import optax
 from torch.utils.data import DataLoader
@@ -20,7 +19,7 @@ from generics._base_config import BaseConfig
 
 
 class BaseJaxTrainer(BaseTrainer):
-    def __init__(self, config: BaseConfig, key: KeyArray):
+    def __init__(self, config: BaseConfig, key: Array):
         super(BaseJaxTrainer, self).__init__(config)
         self.key, self.train_key = jrandom.split(key, 2)
 
@@ -58,7 +57,7 @@ class BaseJaxTrainer(BaseTrainer):
         return NumpyLoader(dataset, **kwargs)
 
     @abstractmethod
-    def _init_optimizers_w_states(self) -> Sequence[Tuple[optax.GradientTransformation, optax.OptState]]:
+    def _init_optimizers_w_states(self) -> Sequence[Tuple[optax.GradientTransformation, optax.OptState, optax.Schedule]]:
         pass
 
     @abstractmethod
@@ -70,7 +69,7 @@ class BaseJaxTrainer(BaseTrainer):
             Tuple[optax.GradientTransformation, optax.OptState]
         ]] = None,
         *,
-        key: Optional[KeyArray] = None
+        key: Optional[Array] = None
     ) -> Tuple[Tuple[Array, ...], Dict[str, Any]]:
         pass
 
@@ -81,6 +80,7 @@ class BaseJaxTrainer(BaseTrainer):
             self.log.reset_stat('train')
             total_loss = 0
             for batch in self.train_data:
+                self.model = eqx.nn.inference_mode(self.model, False)
                 _, self.train_key = jrandom.split(self.train_key, 2)
                 self.model, loss, aux_data = self._step(
                     self.model, batch, optimizers_w_states, key=self.train_key)
@@ -99,6 +99,13 @@ class BaseJaxTrainer(BaseTrainer):
 
             print(
                 f"[Epoch {epoch}]: Valid Loss: {valid_loss:.3f} | Test Loss: {test_loss:.3f}")
+
+            for _, _, opt_scheduler in optimizers_w_states:
+                if opt_scheduler is None:
+                    continue
+
+                last_lr = opt_scheduler(epoch * len(self.train_data))
+                print("Learning rate updated to: ", last_lr)
 
             if not self.early_stopping.step(valid_loss, self.model, f"checkpoints/{self.experiment_key}"):
                 break
@@ -122,8 +129,6 @@ class BaseJaxTrainer(BaseTrainer):
             if visualization_path is not None:
                 self.visualize(batch, os.path.join(
                     visualization_path, f"plot_{step}.png"))
-
-        self.model = eqx.nn.inference_mode(self.model, value=False)
 
         if stat_split is not None:
             self.log.scale_stat(stat_split, len(data))

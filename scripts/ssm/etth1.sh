@@ -1,5 +1,5 @@
-pred_lens=(96 192 336 720)
-# pred_lens=(720)
+# pred_lens=(96 192 336 720)
+pred_lens=(96)
 
 config="ssm"
 
@@ -21,6 +21,9 @@ do
         --model.d_dt=64 \
         --model.patch_size=48 \
         --lr.rec=0.001 \
-        --lr.pred=0.0006 \
-        --data.batch_size=16
+        --lr.pred=0.001 \
+        --lr.n_warmup_epochs=3 \
+        --lr.decay=0.8 \
+        --patience=5 \
+        --data.batch_size=64
 done

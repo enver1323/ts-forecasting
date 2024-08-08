@@ -4,7 +4,6 @@ import os
 import numpy as np
 import jax
 from jaxtyping import Array, Float
-from jax.random import KeyArray
 import jax.numpy as jnp
 import equinox as eqx
 import optax
@@ -41,7 +40,7 @@ def compute_loss(
 
 
 class SliderTrainer(BaseJaxTrainer):
-    def __init__(self, config: BaseConfig, key: KeyArray):
+    def __init__(self, config: BaseConfig, key: Array):
         self.config: SliderConfig
         self.model: SlidingPredictor
         super(SliderTrainer, self).__init__(config, key)
@@ -78,7 +77,9 @@ class SliderTrainer(BaseJaxTrainer):
         self,
         model: SlidingPredictor,
         batch: Sequence[np.ndarray],
-        optimizers: Optional[Sequence[Tuple[GradientTransformation, OptState]]] = None
+        optimizers: Optional[Sequence[Tuple[GradientTransformation, OptState]]] = None,
+        *,
+        key: Array = None
     ):
         pred_optim, pred_state = optimizers or (None, None)
 

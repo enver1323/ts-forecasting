@@ -1,5 +1,5 @@
-# pred_lens=(96 192 336 720)
-pred_lens=(96)
+pred_lens=(96 192 336 720)
+# pred_lens=(96)
 
 config="rec_enc"
 

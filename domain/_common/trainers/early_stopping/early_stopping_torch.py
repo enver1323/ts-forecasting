@@ -5,10 +5,9 @@ import os
 
 class EarlyStopping:
     def __init__(self, patience: int, filename="checkpoint.pth"):
-        self.valid_factor = None
         self.patience = patience
-        self.n_fails = 0
         self.filename = filename
+        self.reset()
 
     def step(self, valid_factor, model, path: str) -> bool:
         if self.valid_factor is None or valid_factor < self.valid_factor:
@@ -23,6 +22,10 @@ class EarlyStopping:
             return False
 
         return True
+
+    def reset(self):
+        self.valid_factor = None
+        self.n_fails = 0
 
     def save_checkpoint(self, model: nn.Module, path: str):
         if not os.path.exists(path):

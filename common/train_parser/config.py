@@ -58,5 +58,29 @@ PARSER_CONFIGS = {
     'slider': ConfigLoader(
         ('domain.slider.config', 'SliderConfig'),
         ('domain.slider.trainer', 'SliderTrainer')
-    )
+    ),
+    'denoise_rnn': ConfigLoader(
+        ('domain.denoise_rnn.config', 'DenoiseRNNConfig'),
+        ('domain.denoise_rnn.trainer', 'DenoiseRNNTrainer')
+    ),
+    'rnn_dec': ConfigLoader(
+        ('domain.rnn_dec.config', 'RNNDecConfig'),
+        ('domain.rnn_dec.trainer', 'RNNDecTrainer')
+    ),
+    'seg_rnn': ConfigLoader(
+        ('domain.seg_rnn.config', 'SegRNNConfig'),
+        ('domain.seg_rnn.trainer', 'SegRNNTrainer')
+    ),
+    'dist_match': ConfigLoader(
+        ('domain.dist_match.config', 'DistMatchConfig'),
+        ('domain.dist_match.trainer', 'DistMatchTrainer')
+    ),
+    'keeper': ConfigLoader(
+        ('domain.keeper.config', 'KeeperConfig'),
+        ('domain.keeper.trainer', 'KeeperTrainer')
+    ),
+    'bilinear': ConfigLoader(
+        ('domain.bilinear.config', 'BiLinearConfig'),
+        ('domain.bilinear.trainer', 'BiLinearTrainer')
+    ),
 }

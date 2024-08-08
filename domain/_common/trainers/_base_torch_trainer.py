@@ -2,6 +2,7 @@ import os
 from abc import abstractmethod
 from typing import Optional, Sequence, Type, Tuple, Dict, Any
 
+import numpy as np
 import torch
 from torch import Tensor, nn
 from torch.optim import Optimizer
@@ -9,6 +10,7 @@ from torch.optim.lr_scheduler import LRScheduler
 from torch.utils.data import DataLoader
 
 from domain._common.trainers.early_stopping.early_stopping_torch import EarlyStopping
+from domain._common.losses.metrics_torch import mse, mae
 from generics import BaseTrainer, BaseConfig
 
 
@@ -57,7 +59,11 @@ class BaseTorchTrainer(BaseTrainer):
         pass
 
     @abstractmethod
-    def _step(self, batch: Sequence[torch.Tensor], optimizers: Optional[Sequence[Optimizer]] = None) -> Tuple[Sequence[Tensor], Dict[str, Any]]:
+    def _predict(self, batch) -> Tuple[Tensor, Tuple[Tensor, Tensor]]:
+        pass
+
+    @abstractmethod
+    def _step(self, batch: Sequence[torch.Tensor], optimizers: Optional[Sequence[Optimizer]] = None, epoch: Optional[int] = None) -> Tuple[Sequence[Tensor], Dict[str, Any]]:
         pass
 
     def train(self):
@@ -72,7 +78,7 @@ class BaseTorchTrainer(BaseTrainer):
             total_loss = 0
             for batch in self.train_data:
                 batch = [datum.float().to(self.device) for datum in batch]
-                losses, aux_data = self._step(batch, optimizers)
+                losses, aux_data = self._step(batch, optimizers, epoch)
 
                 total_loss += losses[0].item()
 
@@ -81,8 +87,11 @@ class BaseTorchTrainer(BaseTrainer):
             self.log.scale_stat('train', len(self.train_data))
             self.log.show_stat('train')
 
-            valid_loss = self.evaluate(self.valid_data, 'valid')
-            test_loss = self.evaluate(self.test_data, 'test')
+            valid_loss = self.evaluate(self.valid_data, 'valid', epoch=epoch)
+            test_loss = self.evaluate(self.test_data, 'test', epoch=epoch)
+
+            print(
+                f"[Epoch {epoch}]: Valid Loss: {valid_loss:.3f} | Test Loss: {test_loss:.3f}")
 
             self._scheduler_step(schedulers, optimizers, valid_loss, epoch)
 
@@ -91,7 +100,7 @@ class BaseTorchTrainer(BaseTrainer):
 
         self.model.train(model_state)
 
-    def evaluate(self, data: Optional[DataLoader] = None, stat_split: Optional[str] = None, visualization_path: Optional[str] = None):
+    def evaluate(self, data: Optional[DataLoader] = None, stat_split: Optional[str] = None, visualization_path: Optional[str] = None, epoch: Optional[int] = None):
         model_state = self.model.training
         self.model.eval()
         with torch.no_grad():
@@ -104,7 +113,7 @@ class BaseTorchTrainer(BaseTrainer):
 
             for step, batch in enumerate(data):
                 batch = [datum.float().to(self.device) for datum in batch]
-                losses, aux_data = self._step(batch)
+                losses, aux_data = self._step(batch, epoch=epoch)
                 total_loss += losses[0].item()
                 if stat_split is not None:
                     self.log.add_stat(stat_split, aux_data)
@@ -123,12 +132,10 @@ class BaseTorchTrainer(BaseTrainer):
     def test(self):
         self.early_stopping.load_checkpoint(
             self.model, f"checkpoints/{self.experiment_key}")
-        loss = self.evaluate(self.test_data, 'test',
-                             os.path.join(self.PLOT_PATH, 'test'))
-
+        test_loss = self.evaluate(self.test_data, 'test', self.PLOT_PATH)
         self.write_all_results()
 
-        return loss
+        return test_loss
 
     @abstractmethod
     def visualize(self, batch: Sequence[torch.Tensor], filepath: str):

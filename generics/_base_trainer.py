@@ -33,13 +33,13 @@ class BaseTrainer(ABC):
         dataset_config = config.dataset
         data_loader = DATASET_LOADER_KEY_MAP[config.loader]
         self.train_data = self._get_data_loader(
-            dataset_config, data_loader, DataSplit.train, batch_size=config.batch_size, shuffle=True
+            dataset_config, data_loader, DataSplit.train, batch_size=config.batch_size, shuffle=True, drop_last=True
         )
         self.valid_data = self._get_data_loader(
-            dataset_config, data_loader, DataSplit.valid, batch_size=config.batch_size, shuffle=True
+            dataset_config, data_loader, DataSplit.valid, batch_size=config.batch_size, shuffle=True, drop_last=True
         )
         self.test_data = self._get_data_loader(
-            dataset_config, data_loader, DataSplit.test, batch_size=config.batch_size
+            dataset_config, data_loader, DataSplit.test, batch_size=config.batch_size, drop_last=True
         )
 
     @abstractmethod

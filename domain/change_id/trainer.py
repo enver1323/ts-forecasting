@@ -98,7 +98,9 @@ class ChangeIDTrainer(BaseJaxTrainer):
         self,
         model: ChangeID,
         batch: Sequence[np.ndarray],
-        optimizers: Optional[Sequence[Tuple[GradientTransformation, OptState]]] = None
+        optimizers: Optional[Sequence[Tuple[GradientTransformation, OptState]]] = None,
+        *,
+        key: Array = None
     ):
         (data_optim, data_state), (cp_optim, cp_state) = optimizers or (
             (None, None), (None, None))

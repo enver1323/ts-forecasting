@@ -80,7 +80,7 @@ class RecEncTrainer(BaseTorchTrainer):
                 param_group['lr'] = lr
             print('Updating learning rate to {}'.format(lr))
 
-    def _step(self, batch: Sequence[torch.Tensor], optimizers: Optional[Sequence[torch.optim.Optimizer]] = None):
+    def _step(self, batch: Sequence[torch.Tensor], optimizers: Optional[Sequence[torch.optim.Optimizer]] = None, epoch: Optional[int] = None) -> Tuple[Sequence[Tensor], Dict[str, Any]]:
         optimizer, = optimizers or (None,)
 
         (loss,), aux_data = self._compute_loss(batch)

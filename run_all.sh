@@ -7,7 +7,7 @@ scripts=(
     "ettm1.sh"
     "ettm2.sh"
     "etth1.sh"
-    "exchange.sh"
+    "exchange_rate.sh"
 )
 
 for script in ${scripts[@]};

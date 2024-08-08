@@ -35,7 +35,9 @@ def app(*args, **kwargs):
     torch.autograd.set_detect_anomaly(True)
 
     trainer = trainer_type(config, device)
+    print(trainer.experiment_key)
     trainer.train()
+    print(trainer.experiment_key)
     trainer.test()
     return trainer
 

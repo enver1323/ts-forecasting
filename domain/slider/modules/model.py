@@ -2,6 +2,7 @@ from abc import ABC
 from equinox import nn
 import equinox as eqx
 import jax
+from jaxtyping import Array
 import jax.nn as jnn
 import jax.random as jrandom
 import jax.numpy as jnp
@@ -46,7 +47,7 @@ class SlidingPredictor(eqx.Module):
             key=predictor_k
         )
 
-    def __call__(self, x: jnp.ndarray):
+    def __call__(self, x: jnp.ndarray, *, key: Array=None):
         x_detail = self.detail_slider(x)
         x_general = self.general_slider(x)
 

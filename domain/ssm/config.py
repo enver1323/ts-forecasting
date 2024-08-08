@@ -23,6 +23,7 @@ class SSMConfig(BaseConfig):
         d_col: int = 32
         patch_size: int = 16
         n_blocks: int = 1
+        dropout: float = 0.5
 
     @dataclass
     class DataConfig:
@@ -39,7 +40,8 @@ class SSMConfig(BaseConfig):
     class LearningRateConfig:
         rec: float = 1e-4
         pred: float = 1e-4
-        gamma: float = 0.3
+        decay: float = 0.8
+        n_warmup_epochs: int = 3
 
     model: ModelConfig = ModelConfig()
     data: DataConfig = DataConfig()

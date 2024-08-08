@@ -1,5 +1,5 @@
 # pred_lens=(96 192 336 720)
-pred_lens=(96)
+pred_lens=(720)
 
 config="rec_enc"
 
@@ -16,8 +16,9 @@ do
         --model.d_model=512 \
         --model.dropout=0.5 \
         --model.patch_len=48 \
-        --lr.init=0.001 \
-        --lr.decay=0.8 \
+        --lr.init=0.0003 \
+        --lr.decay=1.0 \
         --data.batch_size=256 \
-        --patience=5
+        --patience=100 \
+        --n_epochs=100
 done

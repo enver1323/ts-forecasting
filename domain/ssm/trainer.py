@@ -38,18 +38,23 @@ from generics import BaseConfig
 @eqx.filter_jit
 def predict(
     model: SSM,
-    x: Float[Array, "batch context_size n_channels"]
+    x: Float[Array, "batch context_size n_channels"],
+    *,
+    key: Optional[Array] = None
 ) -> Float[Array, "batch context_size n_channels"]:
-    preds = jax.vmap(model.predict)(x)
+    model_w_k = partial(model.predict, key=key)
+    preds = jax.vmap(model_w_k)(x)
     return preds
 
 
 def compute_forecasting_loss(
     model: SSM,
     x: Float[Array, "batch context_size n_channels"],
-    y: Float[Array, "batch context_size n_channels"]
+    y: Float[Array, "batch context_size n_channels"],
+    *,
+    key: Optional[Array] = None
 ) -> Tuple[Array, Tuple[Array, Array, Array]]:
-    preds = predict(model, x)
+    preds = predict(model, x, key=key)
     mse_loss = mse(preds, y)
     mae_loss = mae(preds, y)
 
@@ -100,17 +105,25 @@ class SSMTrainer(BaseJaxTrainer):
         return f"{model_name}_{data}_({seq_len}->{pred_len}|{patch_size})x{n_blocks}_pred_loss_ssm"
 
     def _init_optimizers_w_states(self):
-        rec_optim = optax.adamw(self.config.lr.rec)
+        lr_conf = self.config.lr
+        rec_optim = optax.adamw(lr_conf.rec)
         rec_state = rec_optim.init(eqx.filter(self.model, eqx.is_array))
 
-        pred_optim = optax.adamw(self.config.lr.pred)
+        n_steps_per_epoch = len(self.train_data)
+        pred_scheduler = optax.exponential_decay(
+            lr_conf.pred,
+            n_steps_per_epoch,
+            lr_conf.decay,
+            lr_conf.n_warmup_epochs,
+            staircase=True)
+        pred_optim = optax.adamw(pred_scheduler)
         pred_state = pred_optim.init(eqx.filter(self.model, eqx.is_array))
 
         return (
             # Reconstruction optimizer
-            (rec_optim, rec_state),
+            # (rec_optim, rec_state),
             # Pred optimizer
-            (pred_optim, pred_state),
+            (pred_optim, pred_state, pred_scheduler),
         )
 
     def _get_batch_data(self, batch):
@@ -126,8 +139,10 @@ class SSMTrainer(BaseJaxTrainer):
         *,
         key: Optional[KeyArray] = None,
     ):
-        (rec_optim, rec_state), (pred_optim, pred_state) = optimizers or (
-            (None, None), (None, None))
+        # (rec_optim, rec_state), (pred_optim, pred_state) = optimizers or (
+        #     (None, None), (None, None))
+        (pred_optim, pred_state, _), = optimizers or (
+            (None, None, None),)
 
         x, y = self._get_batch_data(batch)
 
@@ -140,8 +155,9 @@ class SSMTrainer(BaseJaxTrainer):
         #     )
         #     model = eqx.apply_updates(model, rec_updates)
 
+        forecasting_loss_fn = partial(compute_forecasting_loss, key=key)
         (forecasting_loss, (*_, pred_mse_loss, pred_mae_loss)), grads = eqx.filter_value_and_grad(
-            compute_forecasting_loss, has_aux=True)(model, x, y)
+            forecasting_loss_fn, has_aux=True)(model, x, y)
         if pred_optim is not None and pred_state is not None:
             pred_updates, pred_state = pred_optim.update(
                 grads, pred_state, params=eqx.filter(model, eqx.is_array)
